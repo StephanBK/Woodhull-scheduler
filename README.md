@@ -69,7 +69,7 @@ See `app/db.py` for connection details and `migrations/` for schema.
 - ✅ Chunk 5 — Spatial floor-plan view
 - ✅ Chunk 6 — Hospital "mark unavailable" UI
 - ✅ Chunk 7 — Advance-notice reschedule optimizer
-- ⏳ Chunk 8 — Same-day swap engine
+- ✅ Chunk 8 — Same-day swap engine
 
 ## Frontend dev
 

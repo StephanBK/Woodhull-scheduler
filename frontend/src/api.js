@@ -28,16 +28,21 @@ async function del(path) {
 }
 
 export const api = {
-  health:     () => get('/api/health'),
-  schedule:   () => get('/api/schedule'),
-  day:        (n) => get(`/api/schedule/day/${n}`),
-  rooms:      () => get('/api/rooms'),
-  config:     () => get('/api/config'),
-  workItem:   (id) => get(`/api/work-items/${id}`),
-  floorplan:  () => get('/api/floorplan'),
-  marks:      (status) => get('/api/unavailability' + (status ? `?status=${status}` : '')),
-  markImpact: () => get('/api/unavailability/impact'),
-  markRoom:   (room_code, day, marked_by, reason) =>
-    post('/api/unavailability', { room_code, day, marked_by, reason }),
-  cancelMark: (id) => del(`/api/unavailability/${id}`),
+  health:      () => get('/api/health'),
+  schedule:    () => get('/api/schedule'),
+  day:         (n) => get(`/api/schedule/day/${n}`),
+  rooms:       () => get('/api/rooms'),
+  config:      () => get('/api/config'),
+  workItem:    (id) => get(`/api/work-items/${id}`),
+  floorplan:   () => get('/api/floorplan'),
+  // Unavailability
+  roomsForDay: (n) => get(`/api/unavailability/rooms-for-day/${n}`),
+  listMarks:   (q = '') => get(`/api/unavailability${q ? '?' + q : ''}`),
+  createMark:  (body) => post('/api/unavailability', body),
+  cancelMark:  (id) => del(`/api/unavailability/${id}`),
+  // Same-day swap
+  suggestSwap: (locked, day, n=5) =>
+    get(`/api/swap/suggest?locked=${encodeURIComponent(locked)}&day=${day}&top_n=${n}`),
+  executeSwap: (body) => post('/api/swap/execute', body),
+  swapHistory: (day) => get(`/api/swap/history${day != null ? '?day=' + day : ''}`),
 }
