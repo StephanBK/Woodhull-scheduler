@@ -4,6 +4,7 @@ import RoleSelector from './components/RoleSelector'
 import InstallerView from './components/InstallerView'
 import InovuesView from './components/InovuesView'
 import HospitalView from './components/HospitalView'
+import ErrorBoundary from './components/ErrorBoundary'
 
 export default function App() {
   // Persist role across reloads — installers shouldn't have to re-pick every time
@@ -48,15 +49,17 @@ export default function App() {
           </div>
         )}
 
-        {role === 'installer' && (
-          <InstallerView projectStartDate={config?.project_start_date} />
-        )}
+        <ErrorBoundary key={role}>
+          {role === 'installer' && (
+            <InstallerView projectStartDate={config?.project_start_date} />
+          )}
 
-        {role === 'inovues' && <InovuesView />}
+          {role === 'inovues' && <InovuesView />}
 
-        {role === 'hospital' && (
-          <HospitalView projectStartDate={config?.project_start_date} />
-        )}
+          {role === 'hospital' && (
+            <HospitalView projectStartDate={config?.project_start_date} />
+          )}
+        </ErrorBoundary>
       </main>
     </div>
   )

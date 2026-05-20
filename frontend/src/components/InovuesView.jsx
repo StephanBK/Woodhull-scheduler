@@ -135,7 +135,7 @@ function ReplanTab() {
   const [successMsg, setSuccessMsg] = useState(null)
 
   function refresh() {
-    api.marks('pending').then(setMarks).catch(e => setError(e.message))
+    api.listMarks('status=pending').then(setMarks).catch(e => setError(e.message))
   }
   useEffect(() => { refresh() }, [])
 
