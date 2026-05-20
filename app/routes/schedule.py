@@ -138,3 +138,70 @@ def list_versions():
         FROM schedule_versions
         ORDER BY id DESC
     """)
+
+
+@router.get("/schedule/hospital")
+def hospital_schedule(version_id: int | None = None):
+    """
+    Hospital-friendly view of the schedule: each install day with the list of
+    rooms being worked on and the total window count. Deliberately omits
+    panel types and bay numbers — hospital staff only care about which rooms
+    are affected on which day.
+    """
+    vid = version_id or active_version_id()
+
+    # Days + total windows
+    day_rows = fetch_all("""
+        SELECT a.day, SUM(wi.qty) AS total_windows,
+               COUNT(DISTINCT wi.id) AS work_item_count
+        FROM assignments a
+        JOIN work_items wi ON wi.id = a.work_item_id
+        WHERE a.version_id = :v
+        GROUP BY a.day
+        ORDER BY a.day
+    """, v=vid)
+
+    # Rooms touched per day (distinct — a room may be hit by >1 work item)
+    room_rows = fetch_all("""
+        SELECT DISTINCT a.day, wir.room_code, r.kind, r.description
+        FROM assignments a
+        JOIN work_item_rooms wir ON wir.work_item_id = a.work_item_id
+        JOIN rooms r ON r.code = wir.room_code
+        WHERE a.version_id = :v
+        ORDER BY a.day, wir.room_code
+    """, v=vid)
+
+    rooms_by_day: dict[int, list[dict]] = {}
+    for r in room_rows:
+        rooms_by_day.setdefault(r["day"], []).append({
+            "room_code": r["room_code"],
+            "kind": r["kind"],
+            "description": r["description"],
+        })
+
+    # Pending/applied unavailability marks, so the hospital can see which
+    # days/rooms they've already flagged
+    marks = fetch_all("""
+        SELECT day, room_code, status FROM room_unavailability
+        WHERE status IN ('pending', 'applied')
+    """)
+    marks_by_day: dict[int, dict[str, str]] = {}
+    for m in marks:
+        marks_by_day.setdefault(m["day"], {})[m["room_code"]] = m["status"]
+
+    days = []
+    for d in day_rows:
+        day_num = d["day"]
+        day_marks = marks_by_day.get(day_num, {})
+        rooms = rooms_by_day.get(day_num, [])
+        for room in rooms:
+            room["mark_status"] = day_marks.get(room["room_code"])  # None | pending | applied
+        days.append({
+            "day": day_num,
+            "total_windows": d["total_windows"],
+            "room_count": len(rooms),
+            "rooms": rooms,
+        })
+
+    return {"version_id": vid, "days": days}
+

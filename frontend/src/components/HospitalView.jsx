@@ -1,18 +1,22 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { api } from '../api'
+import { dayLabel, dayDateOnly } from '../dates'
 
 /**
  * Hospital view: browse rooms with scheduled work, tap into a room,
  * see which days work is happening, and mark a day as unavailable.
  * Marks queue with status='pending' until INOVUES triggers a replan.
+ *
+ * Also has a Schedule tab: a day-by-day list of what rooms are worked
+ * on when, so hospital staff can see the whole plan at a glance.
  */
-export default function HospitalView() {
+export default function HospitalView({ projectStartDate }) {
   const [rooms, setRooms] = useState(null)
   const [marks, setMarks] = useState([])
   const [search, setSearch] = useState('')
   const [openRoom, setOpenRoom] = useState(null)
   const [error, setError] = useState(null)
-  const [tab, setTab] = useState('browse')
+  const [tab, setTab] = useState('schedule')
 
   const refresh = async () => {
     try {
@@ -71,6 +75,7 @@ export default function HospitalView() {
 
       <div className="flex border-2 border-ink rounded-sm overflow-hidden">
         {[
+          { id: 'schedule', label: 'Schedule' },
           { id: 'browse',  label: 'Browse rooms' },
           { id: 'pending', label: `Pending (${marks.length})` },
         ].map(t => (
@@ -82,6 +87,10 @@ export default function HospitalView() {
           >{t.label}</button>
         ))}
       </div>
+
+      {tab === 'schedule' && (
+        <ScheduleTab projectStartDate={projectStartDate} />
+      )}
 
       {tab === 'browse' && (
         <>
@@ -229,5 +238,111 @@ function PendingList({ marks, onCancel }) {
         </li>
       ))}
     </ul>
+  )
+}
+
+/**
+ * Schedule tab — day-by-day list of which rooms get worked on when.
+ * Hospital-friendly: rooms + window counts only, no panel/bay jargon.
+ * Tap a day to expand its room list.
+ */
+function ScheduleTab({ projectStartDate }) {
+  const [data, setData] = useState(null)
+  const [error, setError] = useState(null)
+  const [openDay, setOpenDay] = useState(null)
+
+  useEffect(() => {
+    api.hospitalSchedule()
+      .then(d => setData(d))
+      .catch(e => setError(e.message))
+  }, [])
+
+  if (error) {
+    return (
+      <div className="border-2 border-warn bg-warn/10 p-3 font-mono text-sm text-warn">
+        {error}
+      </div>
+    )
+  }
+  if (!data) {
+    return (
+      <div className="border-2 border-rule p-6 text-center font-mono text-sm text-ink/50">
+        loading schedule…
+      </div>
+    )
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="font-mono text-[10px] uppercase tracking-wider text-ink/60 px-1">
+        {data.days.length} install days
+        {!projectStartDate && ' · set project start date for calendar dates'}
+      </div>
+      {data.days.map(day => (
+        <DayRow
+          key={day.day}
+          day={day}
+          projectStartDate={projectStartDate}
+          expanded={openDay === day.day}
+          onToggle={() => setOpenDay(openDay === day.day ? null : day.day)}
+        />
+      ))}
+    </div>
+  )
+}
+
+function DayRow({ day, projectStartDate, expanded, onToggle }) {
+  const dateStr = dayDateOnly(projectStartDate, day.day)
+  // Count how many rooms on this day are already flagged unavailable
+  const flagged = day.rooms.filter(r => r.mark_status).length
+
+  return (
+    <div className="border-2 border-ink bg-paper">
+      <button
+        onClick={onToggle}
+        className="w-full px-3 py-3 flex items-baseline gap-2 text-left hover:bg-ink/5 transition-colors"
+      >
+        <span className="font-display text-2xl tracking-wider leading-none">
+          DAY {day.day}
+        </span>
+        {dateStr && (
+          <span className="font-mono text-xs text-ink/70">{dateStr}</span>
+        )}
+        {flagged > 0 && (
+          <span className="sticker-warn">{flagged} flagged</span>
+        )}
+        <span className="ml-auto font-mono text-xs whitespace-nowrap text-ink/70">
+          {day.room_count} room{day.room_count === 1 ? '' : 's'} · {day.total_windows}w
+        </span>
+        <span className="font-mono text-ink/40">{expanded ? '▼' : '►'}</span>
+      </button>
+
+      {expanded && (
+        <div className="border-t-2 border-ink p-3">
+          <div className="font-mono text-[10px] uppercase tracking-wider text-ink/60 mb-2">
+            rooms worked on this day
+          </div>
+          <div className="flex flex-wrap gap-1.5">
+            {day.rooms.map(room => (
+              <span
+                key={room.room_code}
+                className={
+                  'font-mono text-xs px-2 py-1 border-2 rounded-sm ' +
+                  (room.mark_status === 'pending'
+                    ? 'border-flag bg-flag/20 text-ink'
+                    : room.mark_status === 'applied'
+                      ? 'border-warn bg-warn/10 text-warn line-through'
+                      : 'border-ink/30 bg-paper text-ink')
+                }
+                title={room.description || room.room_code}
+              >
+                {room.room_code}
+                {room.mark_status === 'pending' && ' ⚑'}
+              </span>
+            ))}
+          </div>
+        </div>
+      )}
+    </div>
   )
 }

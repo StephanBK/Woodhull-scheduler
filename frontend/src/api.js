@@ -31,6 +31,7 @@ export const api = {
   health:      () => get('/api/health'),
   schedule:    () => get('/api/schedule'),
   day:         (n) => get(`/api/schedule/day/${n}`),
+  hospitalSchedule: () => get('/api/schedule/hospital'),
   rooms:       () => get('/api/rooms'),
   config:      () => get('/api/config'),
   workItem:    (id) => get(`/api/work-items/${id}`),
