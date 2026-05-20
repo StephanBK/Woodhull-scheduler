@@ -45,11 +45,42 @@ def get_batch_on_site_by_day():
     return {r["batch_code"]: r["earliest_day"] for r in rows}
 
 
-def get_weekly_caps():
-    r = fetch_one("SELECT value FROM config WHERE key = 'max_panels_per_week'")
+def get_daily_caps():
+    """
+    Per-day window-install cap, indexed by week (1..5+).
+
+    The crew can install at most N windows in a single day; N can ramp up
+    week by week. Stored in config under 'max_windows_per_day' as a JSON
+    object {week: cap}. Default 60 for every week.
+
+    (Legacy key 'max_panels_per_week' is read as a fallback so older configs
+    don't break, but the value is treated as a per-day cap.)
+    """
+    r = fetch_one("SELECT value FROM config WHERE key = 'max_windows_per_day'")
     if not r:
-        return {str(w): 65 for w in range(1, 6)}
-    return json.loads(r["value"])
+        r = fetch_one("SELECT value FROM config WHERE key = 'max_panels_per_week'")
+    if not r:
+        return {w: 60 for w in range(1, 8)}
+    raw = json.loads(r["value"])
+    # Normalise keys to ints
+    caps = {}
+    for k, v in raw.items():
+        try:
+            caps[int(k)] = int(v)
+        except (ValueError, TypeError):
+            continue
+    return caps
+
+
+def daily_cap_for(caps: dict, day: int) -> int:
+    """The per-day window cap that applies to a given install day."""
+    wk = week_of(day)
+    if wk in caps:
+        return caps[wk]
+    # Beyond the configured weeks (project extension): use the last known cap
+    if caps:
+        return caps[max(caps)]
+    return 60
 
 
 def week_of(day: int) -> int:
@@ -97,9 +128,9 @@ def plan(version_id: int | None = None) -> dict:
         unavailable[m["room_code"]].add(m["day"])
 
     batch_avail = get_batch_on_site_by_day()
-    weekly_caps = get_weekly_caps()
+    daily_caps = get_daily_caps()
 
-    # Compute current per-day panel-qty load (for capacity checks)
+    # Compute current per-day window load (for capacity checks)
     daily_load: dict[int, int] = defaultdict(int)
     for wi_id, d in assignments.items():
         daily_load[d] += wi_meta[wi_id]["qty"]
@@ -108,18 +139,45 @@ def plan(version_id: int | None = None) -> dict:
         return any(day in unavailable[rc] for rc in wi_rooms[wi_id])
 
     def fits_capacity(day: int, qty: int) -> bool:
-        wk = week_of(day)
-        cap = weekly_caps.get(str(wk), weekly_caps.get(wk, 65))
-        # Sum across the week — 5 days
-        week_start = (wk - 1) * 5 + 1
-        wk_total = sum(daily_load[d] for d in range(week_start, week_start + 5))
-        return wk_total + qty <= cap * 5  # weekly cap times 5 days
+        """
+        True if adding `qty` windows to `day` keeps that day at or under its
+        per-day cap. This is the real constraint — a single day cannot exceed
+        the crew's daily install throughput.
+        """
+        cap = daily_cap_for(daily_caps, day)
+        return daily_load[day] + qty <= cap
 
-    # 1. Identify stuck items
+    # 1. Identify stuck items.
+    #    (a) room conflict — a room is marked unavailable on its day
+    #    (b) over-capacity — the day exceeds its per-day window cap; we peel
+    #        items off the day (largest first) until it's back under cap
     stuck = []
+    seen = set()
     for wi_id, day in assignments.items():
         if has_room_conflict(wi_id, day):
             stuck.append(wi_id)
+            seen.add(wi_id)
+
+    # Over-capacity days: peel items until the day fits.
+    items_by_day: dict[int, list[str]] = defaultdict(list)
+    for wi_id, day in assignments.items():
+        items_by_day[day].append(wi_id)
+    for day, ids in items_by_day.items():
+        cap = daily_cap_for(daily_caps, day)
+        load = daily_load[day]
+        if load <= cap:
+            continue
+        # Peel largest items first until under cap; skip already-stuck ones
+        peelable = sorted(
+            (i for i in ids if i not in seen),
+            key=lambda i: -wi_meta[i]["qty"],
+        )
+        for wi_id in peelable:
+            if load <= cap:
+                break
+            stuck.append(wi_id)
+            seen.add(wi_id)
+            load -= wi_meta[wi_id]["qty"]
 
     # 2. For each stuck item, search for a new day
     max_day = max(assignments.values()) if assignments else 22

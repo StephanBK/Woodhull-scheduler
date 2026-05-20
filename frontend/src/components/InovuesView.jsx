@@ -308,6 +308,9 @@ function AdminTab() {
   const [cfg, setCfg] = useState(null)
   const [error, setError] = useState(null)
   const [savedMsg, setSavedMsg] = useState(null)
+  const [capsChanged, setCapsChanged] = useState(false)
+  const [recalc, setRecalc] = useState(null)   // preview result after recalculate
+  const [busy, setBusy] = useState(false)
 
   useEffect(() => { api.config().then(setCfg).catch(e => setError(e.message)) }, [])
 
@@ -325,7 +328,31 @@ function AdminTab() {
     } catch (e) { setError(e.message) }
   }
 
+  // Run the optimizer preview after a cap change
+  async function runRecalc() {
+    setBusy(true); setError(null)
+    try {
+      const r = await fetch('/api/optimize/preview', { method: 'POST' })
+      if (!r.ok) throw new Error(`${r.status}`)
+      setRecalc(await r.json())
+    } catch (e) { setError(e.message) }
+    finally { setBusy(false) }
+  }
+  async function applyRecalc() {
+    setBusy(true); setError(null)
+    try {
+      const r = await fetch('/api/optimize/apply', { method: 'POST' })
+      if (!r.ok) throw new Error((await r.text()) || `${r.status}`)
+      const j = await r.json()
+      setSavedMsg(`Schedule recalculated — new version v${j.new_version_id}.`)
+      setRecalc(null); setCapsChanged(false)
+    } catch (e) { setError(e.message) }
+    finally { setBusy(false) }
+  }
+
   if (!cfg) return <Loading />
+
+  const caps = cfg.max_windows_per_day || cfg.max_panels_per_week || {}
 
   return (
     <section className="space-y-4">
@@ -348,7 +375,7 @@ function AdminTab() {
 
       <div>
         <label className="block font-mono text-[10px] uppercase tracking-wider text-ink/70 mb-1">
-          Max panels per day, by week
+          Max windows installed per day, by week
         </label>
         <div className="grid grid-cols-5 gap-1">
           {[1,2,3,4,5].map(w => (
@@ -356,12 +383,13 @@ function AdminTab() {
               <div className="font-mono text-[10px] uppercase tracking-wider text-ink/60">wk {w}</div>
               <input
                 type="number"
-                value={cfg.max_panels_per_week?.[w] ?? cfg.max_panels_per_week?.[String(w)] ?? 65}
+                value={caps[w] ?? caps[String(w)] ?? 60}
                 onChange={e => {
                   const v = parseInt(e.target.value || '0', 10)
-                  const next = {...(cfg.max_panels_per_week || {})}
-                  next[w] = v
-                  save('max_panels_per_week', next)
+                  const next = {...caps, [w]: v}
+                  save('max_windows_per_day', next)
+                  setCapsChanged(true)
+                  setRecalc(null)
                 }}
                 className="w-full font-display text-2xl text-center bg-paper focus:outline-none"
               />
@@ -369,9 +397,53 @@ function AdminTab() {
           ))}
         </div>
         <div className="mt-1 font-mono text-[10px] text-ink/50">
-          Panels per day × 5 days = weekly cap. Observed peak: 61.
+          The crew installs at most this many windows in one day. Ramp it up
+          week by week. Default 60.
         </div>
       </div>
+
+      {capsChanged && !recalc && (
+        <div className="border-2 border-warn bg-warn/5 p-3 space-y-2">
+          <div className="font-mono text-xs text-ink/80">
+            Capacity changed. The schedule may need to be recalculated so no
+            day exceeds its new cap.
+          </div>
+          <button
+            onClick={runRecalc}
+            disabled={busy}
+            className="w-full border-2 border-ink py-2 font-display text-lg tracking-wider hover:bg-ink hover:text-paper transition-colors disabled:opacity-50"
+          >
+            {busy ? 'CHECKING…' : 'RECALCULATE SCHEDULE'}
+          </button>
+        </div>
+      )}
+
+      {recalc && (
+        <div className="border-2 border-warn bg-warn/5 p-3 space-y-3">
+          <div className="font-display text-xl tracking-wider text-warn">
+            RECALCULATION PREVIEW
+          </div>
+          <div className="grid grid-cols-3 gap-2 text-center font-mono text-[10px] uppercase tracking-wider">
+            <Stat n={recalc.stuck_count} label="affected" />
+            <Stat n={recalc.moves_count} label="will move" />
+            <Stat n={recalc.unresolvable_count} label="unresolvable"
+                  warn={recalc.unresolvable_count > 0} />
+          </div>
+          {recalc.unresolvable_count > 0 && (
+            <div className="border-2 border-warn bg-warn/20 p-2 font-mono text-xs">
+              {recalc.unresolvable_count} items can't fit under these caps.
+              Raise a cap or extend the project, then recalculate again.
+            </div>
+          )}
+          <button
+            onClick={applyRecalc}
+            disabled={busy || recalc.unresolvable_count > 0}
+            className="w-full bg-warn text-paper border-2 border-ink py-2 font-display text-lg tracking-wider hover:bg-ink transition-colors disabled:opacity-50"
+          >
+            {busy ? 'APPLYING…' : 'CONFIRM & APPLY'}
+          </button>
+        </div>
+      )}
     </section>
   )
 }
