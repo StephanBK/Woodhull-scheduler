@@ -1,0 +1,36 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  html, body, #root {
+    @apply h-full;
+  }
+  body {
+    @apply bg-paper text-ink font-sans antialiased;
+    /* Subtle paper grain */
+    background-image:
+      radial-gradient(circle at 20% 30%, rgba(13, 59, 102, 0.025) 0, transparent 60%),
+      radial-gradient(circle at 80% 70%, rgba(249, 87, 56, 0.02) 0, transparent 50%);
+  }
+}
+
+@layer components {
+  /* Blueprint-style title block strip used across views */
+  .titleblock {
+    @apply border-2 border-ink bg-paper px-3 py-2;
+  }
+
+  /* A "spec sticker" — used for codes like W01-001, RM-44, S6 */
+  .sticker {
+    @apply font-mono text-xs uppercase tracking-wider px-1.5 py-0.5 border border-ink/30 bg-paper rounded-sm;
+  }
+
+  .sticker-warn {
+    @apply font-mono text-xs uppercase tracking-wider px-1.5 py-0.5 border-2 border-warn bg-warn text-paper rounded-sm;
+  }
+
+  .sticker-flag {
+    @apply font-mono text-xs uppercase tracking-wider px-1.5 py-0.5 border-2 border-ink bg-flag text-ink rounded-sm font-semibold;
+  }
+}

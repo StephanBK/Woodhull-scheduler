@@ -65,8 +65,19 @@ See `app/db.py` for connection details and `migrations/` for schema.
 - ✅ Chunk 1 — Schedule extracted from PDF
 - ✅ Chunk 2 — DB schema + load
 - ✅ Chunk 3 — FastAPI backend + Railway config
-- ⏳ Chunk 4 — Installer day-view UI
+- ✅ Chunk 4 — Installer day-view UI (React + Vite + Tailwind)
 - ⏳ Chunk 5 — Spatial floor-plan view
 - ⏳ Chunk 6 — Hospital "mark unavailable" UI
 - ⏳ Chunk 7 — Advance-notice reschedule optimizer
 - ⏳ Chunk 8 — Same-day swap engine
+
+## Frontend dev
+
+```bash
+cd frontend
+npm install
+npm run dev          # Vite dev server on :5173, proxies /api to FastAPI :8765
+# OR: npm run build  # outputs to frontend/dist/, served by FastAPI in production
+```
+
+The built `dist/` is committed so Railway can serve it without a Node step. Rebuild and commit on every UI change.
