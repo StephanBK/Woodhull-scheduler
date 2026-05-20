@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { api } from './api'
 import RoleSelector from './components/RoleSelector'
 import InstallerView from './components/InstallerView'
+import InovuesView from './components/InovuesView'
 import HospitalView from './components/HospitalView'
 
 export default function App() {
@@ -51,12 +52,7 @@ export default function App() {
           <InstallerView projectStartDate={config?.project_start_date} />
         )}
 
-        {role === 'inovues' && (
-          <Placeholder title="INOVUES view" lines={[
-            'Full Gantt + spatial floor plan come in Chunks 5 & 7.',
-            'For now, switch to Installer to see today\'s plan.',
-          ]} />
-        )}
+        {role === 'inovues' && <InovuesView />}
 
         {role === 'hospital' && (
           <HospitalView projectStartDate={config?.project_start_date} />

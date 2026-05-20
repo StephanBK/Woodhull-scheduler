@@ -13,27 +13,31 @@ async function post(path, body) {
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),
   })
-  if (!r.ok) throw new Error(`${r.status} on ${path}`)
+  if (!r.ok) {
+    let detail = `${r.status} ${r.statusText}`
+    try { const j = await r.json(); detail = j.detail || detail } catch {}
+    throw new Error(detail)
+  }
   return r.json()
 }
 
 async function del(path) {
   const r = await fetch(BASE + path, { method: 'DELETE' })
-  if (!r.ok) throw new Error(`${r.status} on ${path}`)
+  if (!r.ok) throw new Error(`${r.status} ${r.statusText} on ${path}`)
   return r.json()
 }
 
 export const api = {
-  health: () => get('/api/health'),
-  schedule: () => get('/api/schedule'),
-  day: (n) => get(`/api/schedule/day/${n}`),
-  rooms: () => get('/api/rooms'),
-  config: () => get('/api/config'),
-  workItem: (id) => get(`/api/work-items/${id}`),
-  floorplan: () => get('/api/floorplan'),
-  // Unavailability
-  roomsForDay: (n) => get(`/api/unavailability/rooms-for-day/${n}`),
-  listMarks: (q = '') => get(`/api/unavailability${q ? '?' + q : ''}`),
-  createMark: (body) => post('/api/unavailability', body),
+  health:     () => get('/api/health'),
+  schedule:   () => get('/api/schedule'),
+  day:        (n) => get(`/api/schedule/day/${n}`),
+  rooms:      () => get('/api/rooms'),
+  config:     () => get('/api/config'),
+  workItem:   (id) => get(`/api/work-items/${id}`),
+  floorplan:  () => get('/api/floorplan'),
+  marks:      (status) => get('/api/unavailability' + (status ? `?status=${status}` : '')),
+  markImpact: () => get('/api/unavailability/impact'),
+  markRoom:   (room_code, day, marked_by, reason) =>
+    post('/api/unavailability', { room_code, day, marked_by, reason }),
   cancelMark: (id) => del(`/api/unavailability/${id}`),
 }

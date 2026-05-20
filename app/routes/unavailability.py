@@ -1,141 +1,118 @@
 """
-Room unavailability endpoints — hospital marks rooms as unavailable on a day.
+Room unavailability marks (hospital-driven).
 
-A mark is created in `pending` state. The optimizer (Chunk 7) reads pending
-marks, replans the schedule, and flips them to `applied`. Hospital can cancel
-a pending mark; applied marks are immutable history.
+A "mark" is the hospital saying: room X is not accessible on day Y.
+Marks queue with status='pending' until the optimizer (Chunk 7) consumes
+them and produces a new schedule version. Once applied, status flips
+to 'applied'. The hospital can also cancel a pending mark.
 """
+from datetime import datetime
 from typing import Optional
 from fastapi import APIRouter, HTTPException
-from pydantic import BaseModel, Field
+from pydantic import BaseModel
 from app.db import fetch_all, fetch_one, execute, engine
 from sqlalchemy import text
 
 router = APIRouter(tags=["unavailability"])
 
 
-class MarkCreate(BaseModel):
+class MarkPayload(BaseModel):
     room_code: str
-    day: int = Field(ge=1, le=30)
+    day: int
     marked_by: Optional[str] = None
     reason: Optional[str] = None
 
 
 @router.get("/unavailability")
-def list_marks(day: Optional[int] = None, status: Optional[str] = None):
-    """List room-unavailability marks, optionally filtered by day or status."""
-    sql = """
-        SELECT ru.id, ru.room_code, r.description AS room_desc,
-               ru.day, ru.marked_by, ru.marked_at, ru.reason, ru.status
-        FROM room_unavailability ru
-        JOIN rooms r ON r.code = ru.room_code
-        WHERE 1=1
-    """
-    params = {}
-    if day is not None:
-        sql += " AND ru.day = :day"
-        params["day"] = day
+def list_marks(status: Optional[str] = None):
+    """All marks, optionally filtered by status (pending|applied|cancelled)."""
     if status:
-        sql += " AND ru.status = :status"
-        params["status"] = status
-    sql += " ORDER BY ru.marked_at DESC"
-    return fetch_all(sql, **params)
+        rows = fetch_all("""
+            SELECT id, room_code, day, marked_by, marked_at, reason, status
+            FROM room_unavailability
+            WHERE status = :s
+            ORDER BY marked_at DESC
+        """, s=status)
+    else:
+        rows = fetch_all("""
+            SELECT id, room_code, day, marked_by, marked_at, reason, status
+            FROM room_unavailability
+            ORDER BY marked_at DESC
+        """)
+    return rows
 
 
 @router.post("/unavailability")
-def create_mark(payload: MarkCreate):
-    """Mark a room unavailable. Idempotent on (room_code, day, status=pending)."""
-    # Verify room exists
-    if not fetch_one("SELECT code FROM rooms WHERE code = :c",
-                     c=payload.room_code):
-        raise HTTPException(404, f"unknown room {payload.room_code}")
-    # Idempotent: if pending mark already exists, return it
+def add_mark(payload: MarkPayload):
+    """Create a pending unavailability mark."""
+    room = fetch_one("SELECT code FROM rooms WHERE code = :c", c=payload.room_code)
+    if not room:
+        raise HTTPException(404, f"room {payload.room_code} not found")
+    if payload.day < 1 or payload.day > 22:
+        raise HTTPException(400, "day must be 1..22")
+
     existing = fetch_one("""
         SELECT id FROM room_unavailability
         WHERE room_code = :c AND day = :d AND status = 'pending'
     """, c=payload.room_code, d=payload.day)
     if existing:
-        return {"id": existing["id"], "idempotent": True}
+        raise HTTPException(409,
+            f"already a pending mark for {payload.room_code} on day {payload.day}")
 
     with engine().begin() as c:
-        result = c.execute(text("""
+        c.execute(text("""
             INSERT INTO room_unavailability(room_code, day, marked_by, reason, status)
-            VALUES (:c, :d, :mb, :r, 'pending')
-        """), {"c": payload.room_code, "d": payload.day,
+            VALUES (:rc, :d, :mb, :r, 'pending')
+        """), {"rc": payload.room_code, "d": payload.day,
                "mb": payload.marked_by, "r": payload.reason})
-        # Get the new id portably (SQLite via lastrowid, Postgres via RETURNING)
-        new_id = (
-            result.lastrowid
-            if hasattr(result, "lastrowid") and result.lastrowid
-            else c.execute(text("""
-                SELECT id FROM room_unavailability
-                WHERE room_code = :c AND day = :d
-                ORDER BY id DESC LIMIT 1
-            """), {"c": payload.room_code, "d": payload.day}).scalar()
-        )
-    return {"id": new_id, "idempotent": False}
+
+    row = fetch_one("""
+        SELECT id, room_code, day, marked_by, marked_at, reason, status
+        FROM room_unavailability
+        WHERE room_code = :c AND day = :d
+        ORDER BY id DESC LIMIT 1
+    """, c=payload.room_code, d=payload.day)
+    return row
 
 
 @router.delete("/unavailability/{mark_id}")
 def cancel_mark(mark_id: int):
-    """Cancel a pending mark. Applied marks cannot be cancelled — they're history."""
-    m = fetch_one(
-        "SELECT id, status FROM room_unavailability WHERE id = :id",
-        id=mark_id,
-    )
-    if not m:
+    """Cancel a pending mark."""
+    existing = fetch_one("SELECT status FROM room_unavailability WHERE id = :i",
+                         i=mark_id)
+    if not existing:
         raise HTTPException(404, "mark not found")
-    if m["status"] != "pending":
-        raise HTTPException(
-            400,
-            f"cannot cancel a mark in status '{m['status']}'"
-        )
-    execute(
-        "UPDATE room_unavailability SET status = 'cancelled' WHERE id = :id",
-        id=mark_id,
-    )
-    return {"ok": True}
+    if existing["status"] != "pending":
+        raise HTTPException(400, f"cannot cancel mark in status {existing['status']}")
+    execute("UPDATE room_unavailability SET status = 'cancelled' WHERE id = :i",
+            i=mark_id)
+    return {"ok": True, "id": mark_id}
 
 
-@router.get("/unavailability/rooms-for-day/{day}")
-def rooms_for_day(day: int):
-    """
-    Return all rooms (with their bay + work item context) that have scheduled
-    work on this day, so the hospital UI can show what's at risk.
-    """
-    rows = fetch_all("""
-        SELECT DISTINCT wir.room_code, r.description AS room_desc,
-               r.kind, wi.id AS work_item_id, wi.bay, wi.qty
-        FROM assignments a
-        JOIN work_items wi      ON wi.id = a.work_item_id
-        JOIN work_item_rooms wir ON wir.work_item_id = wi.id
-        JOIN rooms r            ON r.code = wir.room_code
-        JOIN schedule_versions sv ON sv.id = a.version_id
-        WHERE sv.is_active = TRUE AND a.day = :day
-        ORDER BY wir.room_code
-    """, day=day)
-    # Group by room_code (a room can be touched by multiple work items)
-    by_room: dict[str, dict] = {}
-    for r in rows:
-        rc = r["room_code"]
-        if rc not in by_room:
-            by_room[rc] = {
-                "room_code": rc,
-                "room_desc": r["room_desc"],
-                "kind": r["kind"],
-                "work_items": [],
-            }
-        by_room[rc]["work_items"].append({
-            "id": r["work_item_id"],
-            "bay": r["bay"],
-            "qty": r["qty"],
+@router.get("/unavailability/impact")
+def impact_summary():
+    """For each pending mark, return which work items it affects."""
+    marks = fetch_all("""
+        SELECT id, room_code, day FROM room_unavailability
+        WHERE status = 'pending'
+    """)
+    out = []
+    for m in marks:
+        affected = fetch_all("""
+            SELECT wi.id, wi.bay, wi.qty, wi.rooms_text
+            FROM assignments a
+            JOIN work_items wi ON wi.id = a.work_item_id
+            JOIN work_item_rooms wir ON wir.work_item_id = wi.id
+            JOIN schedule_versions sv ON sv.id = a.version_id
+            WHERE sv.is_active = TRUE
+              AND a.day = :d
+              AND wir.room_code = :c
+        """, d=m["day"], c=m["room_code"])
+        out.append({
+            "mark_id": m["id"],
+            "room_code": m["room_code"],
+            "day": m["day"],
+            "affected_work_items": affected,
+            "affected_qty": sum(a["qty"] for a in affected),
         })
-    # Mark which already have pending unavailability marks
-    pending = fetch_all("""
-        SELECT room_code FROM room_unavailability
-        WHERE day = :day AND status = 'pending'
-    """, day=day)
-    pending_set = {p["room_code"] for p in pending}
-    for r in by_room.values():
-        r["already_marked"] = r["room_code"] in pending_set
-    return list(by_room.values())
+    return out
