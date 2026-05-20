@@ -134,12 +134,11 @@ function ScheduleTab({ projectStartDate, marksByRoomDay, onMarkDay, onCancel }) 
   const [openDay, setOpenDay] = useState(null)
   const [search, setSearch] = useState('')
   const [busyChip, setBusyChip] = useState(null) // "room|day" while a toggle is in flight
+  const [picker, setPicker] = useState(null)     // {roomCode, dayNum} -> replacement modal
 
-  useEffect(() => {
-    api.hospitalSchedule()
-      .then(d => setData(d))
-      .catch(e => setError(e.message))
-  }, [])
+  const reload = () => api.hospitalSchedule().then(setData).catch(e => setError(e.message))
+
+  useEffect(() => { reload() }, [])
 
   // Filter days to those containing a room matching the search query.
   const days = useMemo(() => {
@@ -154,27 +153,22 @@ function ScheduleTab({ projectStartDate, marksByRoomDay, onMarkDay, onCancel }) 
     )
   }, [data, search])
 
-  // Toggle a room's block status for a day. Uses the live marks map so we
-  // always have the current mark id for cancellation.
-  async function toggleRoom(roomCode, dayNum) {
-    const key = `${roomCode}|${dayNum}`
-    setBusyChip(key)
-    try {
-      const existing = marksByRoomDay[roomCode]?.[dayNum]
-      if (existing && existing.status === 'pending') {
-        await onCancel(existing.id)         // unblock
-      } else if (!existing) {
-        await onMarkDay(roomCode, dayNum)   // block
-      }
-      // applied marks can't be toggled — ignored
-      // Re-pull the schedule so chip mark_status reflects reality
-      const fresh = await api.hospitalSchedule()
-      setData(fresh)
-    } catch (e) {
-      setError(e.message)
-    } finally {
-      setBusyChip(null)
+  // Tapping a room:
+  //  - if it's already blocked (pending) -> unblock it instantly
+  //  - if it's free -> open the replacement picker (flag + choose a swap)
+  async function tapRoom(roomCode, dayNum) {
+    const existing = marksByRoomDay[roomCode]?.[dayNum]
+    if (existing && existing.status === 'pending') {
+      setBusyChip(`${roomCode}|${dayNum}`)
+      try {
+        await onCancel(existing.id)
+        await reload()
+      } catch (e) { setError(e.message) }
+      finally { setBusyChip(null) }
+      return
     }
+    if (existing) return  // applied — locked
+    setPicker({ roomCode, dayNum })
   }
 
   if (error) {
@@ -206,7 +200,7 @@ function ScheduleTab({ projectStartDate, marksByRoomDay, onMarkDay, onCancel }) 
           ? `${days.length} day${days.length === 1 ? '' : 's'} with matching rooms`
           : `${data.days.length} install days`}
         {!projectStartDate && ' · set project start date for calendar dates'}
-        {' · tap a room to block / unblock it'}
+        {' · tap a room to flag it & pick a replacement'}
       </div>
       {days.length === 0 && (
         <div className="text-center font-mono text-sm text-ink/50 py-6">
@@ -221,10 +215,19 @@ function ScheduleTab({ projectStartDate, marksByRoomDay, onMarkDay, onCancel }) 
           expanded={openDay === day.day}
           onToggle={() => setOpenDay(openDay === day.day ? null : day.day)}
           searchHighlight={search.trim().toLowerCase()}
-          onToggleRoom={toggleRoom}
+          onToggleRoom={tapRoom}
           busyChip={busyChip}
         />
       ))}
+
+      {picker && (
+        <ReplacementPicker
+          roomCode={picker.roomCode}
+          dayNum={picker.dayNum}
+          onClose={() => setPicker(null)}
+          onDone={async () => { setPicker(null); await reload() }}
+        />
+      )}
     </div>
   )
 }
@@ -296,6 +299,171 @@ function DayRow({ day, projectStartDate, expanded, onToggle,
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+/**
+ * ReplacementPicker — shown when a hospital user taps a room to flag it.
+ *
+ * Instead of just queuing a block, we fetch material-matched replacement
+ * bays and let the user pick one. Picking does an immediate two-way swap +
+ * optimizer recalculation. Exact panel-mix matches are listed first (a
+ * like-for-like swap that keeps every day's window count — and the caps —
+ * unchanged).
+ */
+function ReplacementPicker({ roomCode, dayNum, onClose, onDone }) {
+  const [data, setData] = useState(null)
+  const [error, setError] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const [result, setResult] = useState(null)
+
+  useEffect(() => {
+    api.suggestReplacements(roomCode, dayNum)
+      .then(setData)
+      .catch(e => setError(e.message))
+  }, [roomCode, dayNum])
+
+  async function pick(option) {
+    setBusy(true); setError(null)
+    try {
+      const r = await api.executeReplacement({
+        room_code: roomCode,
+        flagged_day: dayNum,
+        locked_work_item_id: data.locked.work_item_id,
+        replacement_work_item_id: option.work_item_id,
+      })
+      setResult(r)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setBusy(false)
+    }
+  }
+
+  return (
+    <div className="fixed inset-0 bg-ink/40 flex items-end sm:items-center justify-center z-50 p-2">
+      <div className="bg-paper border-2 border-ink w-full max-w-md max-h-[88vh] overflow-y-auto">
+        <div className="bg-ink text-paper px-3 py-3 flex items-baseline gap-2 sticky top-0">
+          <span className="font-display text-xl tracking-wider">FLAG {roomCode}</span>
+          <span className="font-mono text-[10px] uppercase tracking-wider ml-auto">
+            Day {dayNum}
+          </span>
+        </div>
+
+        <div className="p-3 space-y-3">
+          {error && (
+            <div className="border-2 border-warn bg-warn/10 p-2 font-mono text-xs text-warn">
+              {error}
+            </div>
+          )}
+
+          {/* RESULT STATE */}
+          {result && (
+            <div className="space-y-3">
+              <div className="border-2 border-ok bg-ok/10 p-3">
+                <div className="font-display text-lg tracking-wider text-ok">
+                  REPLACEMENT APPLIED
+                </div>
+                <div className="font-mono text-xs text-ink/80 mt-1">
+                  Bay {result.swap.swap_in_moved_to_day != null
+                    ? '' : ''}work swapped into Day {dayNum}. {roomCode}'s
+                  work moved to Day {result.swap.locked_moved_to_day}.
+                </div>
+              </div>
+              {result.recalculated && (
+                <div className="font-mono text-[11px] text-ink/70">
+                  Schedule recalculated — {result.recalc.moves_count} item(s)
+                  shifted to keep caps. The installer has the updated plan.
+                </div>
+              )}
+              {result.warning && (
+                <div className="border-2 border-warn bg-warn/10 p-2 font-mono text-[11px] text-warn">
+                  {result.warning}
+                </div>
+              )}
+              <button
+                onClick={onDone}
+                className="w-full border-2 border-ink bg-ink text-paper py-2 font-display text-lg tracking-wider"
+              >
+                DONE
+              </button>
+            </div>
+          )}
+
+          {/* PICKER STATE */}
+          {!result && !data && !error && (
+            <div className="font-mono text-sm text-ink/50 text-center py-6">
+              finding replacements…
+            </div>
+          )}
+
+          {!result && data && !data.locked && (
+            <div className="space-y-3">
+              <div className="font-mono text-xs text-ink/70">
+                {data.note || 'No work scheduled for this room that day.'}
+              </div>
+              <button onClick={onClose}
+                className="w-full border-2 border-ink py-2 font-mono text-xs uppercase tracking-wider">
+                close
+              </button>
+            </div>
+          )}
+
+          {!result && data && data.locked && (
+            <div className="space-y-2">
+              <div className="font-mono text-[11px] text-ink/70 leading-relaxed">
+                {data.timing === 'imminent'
+                  ? 'Panels are staged on the floor. Only exact-material swaps are offered — the installer moves rooms without fetching anything.'
+                  : 'Pick a replacement. Exact-material matches are listed first — those keep every day’s window count and the caps unchanged.'}
+              </div>
+
+              {data.options.length === 0 && (
+                <div className="border-2 border-warn bg-warn/10 p-3 font-mono text-xs text-warn">
+                  No material-matched replacement is available
+                  {data.timing === 'imminent'
+                    ? ' for an imminent swap. Flag it with INOVUES for a full reschedule instead.'
+                    : '.'}
+                </div>
+              )}
+
+              {data.options.map(o => (
+                <button
+                  key={o.work_item_id}
+                  disabled={busy}
+                  onClick={() => pick(o)}
+                  className={
+                    'w-full border-2 p-2.5 text-left transition-colors disabled:opacity-50 ' +
+                    (o.exact_match
+                      ? 'border-ok bg-ok/5 hover:bg-ok/15'
+                      : 'border-ink/40 bg-paper hover:bg-ink/5')
+                  }
+                >
+                  <div className="flex items-baseline gap-2">
+                    <span className="font-mono text-sm font-semibold">
+                      {o.rooms_text.replace(/\s*\(.*?\)/g, '').trim()}
+                    </span>
+                    <span className={
+                      'font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 ' +
+                      (o.exact_match ? 'bg-ok text-paper' : 'bg-flag text-ink')
+                    }>
+                      {o.exact_match ? 'exact match' : `close (±${o.panel_mix_diff})`}
+                    </span>
+                    <span className="ml-auto font-mono text-[10px] text-ink/60">
+                      Day {o.scheduled_day} · {o.qty}w
+                    </span>
+                  </div>
+                </button>
+              ))}
+
+              <button onClick={onClose} disabled={busy}
+                className="w-full border-2 border-ink py-2 font-mono text-xs uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors disabled:opacity-50">
+                cancel — don’t flag
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   )
 }

@@ -58,4 +58,9 @@ export const api = {
 
   // --- Optimizer status (powers the INOVUES reschedule banner) ---
   optimizeStatus: () => get('/api/optimize/status'),
+
+  // --- Hospital room replacement (flag-and-swap) ---
+  suggestReplacements: (room, day) =>
+    get(`/api/replace/suggest?room=${encodeURIComponent(room)}&day=${day}`),
+  executeReplacement: (body) => post('/api/replace/execute', body),
 }
