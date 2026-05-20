@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react'
 import { api } from './api'
 import RoleSelector from './components/RoleSelector'
 import InstallerView from './components/InstallerView'
+import HospitalView from './components/HospitalView'
 
 export default function App() {
   // Persist role across reloads — installers shouldn't have to re-pick every time
@@ -58,10 +59,7 @@ export default function App() {
         )}
 
         {role === 'hospital' && (
-          <Placeholder title="Hospital view" lines={[
-            'Room-unavailability marker comes in Chunk 6.',
-            'For now, switch to Installer.',
-          ]} />
+          <HospitalView projectStartDate={config?.project_start_date} />
         )}
       </main>
     </div>

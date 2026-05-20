@@ -7,6 +7,22 @@ async function get(path) {
   return r.json()
 }
 
+async function post(path, body) {
+  const r = await fetch(BASE + path, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(body),
+  })
+  if (!r.ok) throw new Error(`${r.status} on ${path}`)
+  return r.json()
+}
+
+async function del(path) {
+  const r = await fetch(BASE + path, { method: 'DELETE' })
+  if (!r.ok) throw new Error(`${r.status} on ${path}`)
+  return r.json()
+}
+
 export const api = {
   health: () => get('/api/health'),
   schedule: () => get('/api/schedule'),
@@ -15,4 +31,9 @@ export const api = {
   config: () => get('/api/config'),
   workItem: (id) => get(`/api/work-items/${id}`),
   floorplan: () => get('/api/floorplan'),
+  // Unavailability
+  roomsForDay: (n) => get(`/api/unavailability/rooms-for-day/${n}`),
+  listMarks: (q = '') => get(`/api/unavailability${q ? '?' + q : ''}`),
+  createMark: (body) => post('/api/unavailability', body),
+  cancelMark: (id) => del(`/api/unavailability/${id}`),
 }
