@@ -55,4 +55,7 @@ export const api = {
     get(`/api/swap/suggest?locked=${encodeURIComponent(locked)}&day=${day}&top_n=${n}`),
   executeSwap: (body) => post('/api/swap/execute', body),
   swapHistory: (day) => get(`/api/swap/history${day != null ? '?day=' + day : ''}`),
+
+  // --- Optimizer status (powers the INOVUES reschedule banner) ---
+  optimizeStatus: () => get('/api/optimize/status'),
 }

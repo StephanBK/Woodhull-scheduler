@@ -14,10 +14,46 @@ export default function InovuesView() {
   const [tab, setTab] = useState(
     () => localStorage.getItem('whs.inovuesTab') || 'gantt'
   )
+  const [status, setStatus] = useState(null)
   useEffect(() => { localStorage.setItem('whs.inovuesTab', tab) }, [tab])
+
+  // Poll optimizer status so the banner stays current as marks/swaps arrive.
+  useEffect(() => {
+    let alive = true
+    const load = () => api.optimizeStatus()
+      .then(s => { if (alive) setStatus(s) })
+      .catch(() => {})
+    load()
+    const t = setInterval(load, 20000)
+    return () => { alive = false; clearInterval(t) }
+  }, [tab])
 
   return (
     <div className="space-y-4 pb-12">
+      {status?.reschedule_needed && (
+        <button
+          onClick={() => setTab('replan')}
+          className="w-full border-2 border-warn bg-warn text-paper px-3 py-3 text-left hover:bg-ink transition-colors"
+        >
+          <div className="font-display text-xl tracking-wider">
+            ⚠ RESCHEDULE NEEDED
+          </div>
+          <div className="font-mono text-[11px] uppercase tracking-wider">
+            {status.pending_count} room{status.pending_count === 1 ? '' : 's'} blocked
+            — tap to preview & apply the replan
+          </div>
+        </button>
+      )}
+      {status && !status.reschedule_needed && status.recent_swaps?.length > 0 && (
+        <div className="border-2 border-ink bg-flag/15 px-3 py-2">
+          <div className="font-mono text-[11px] uppercase tracking-wider text-ink/80">
+            ↻ {status.recent_swaps.length} same-day swap{status.recent_swaps.length === 1 ? '' : 's'} applied
+            — schedule is current ({status.active_version?.label
+              ? `v${status.active_version.id}` : ''})
+          </div>
+        </div>
+      )}
+
       <div className="flex items-stretch border-2 border-ink rounded-sm overflow-hidden">
         {[
           { id: 'gantt',    label: 'Gantt' },

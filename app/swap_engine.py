@@ -189,30 +189,37 @@ def execute_swap(locked_wi_id: str, swap_in_wi_id: str, day: int,
                  triggered_by: str = "inovues",
                  notes: str | None = None) -> dict:
     """
-    Execute the swap:
-      - Move swap_in_wi_id assignment to `day` (the same day as the locked one)
-      - Move locked_wi_id assignment to swap_in's original day
-      - Record the swap in same_day_swaps
-    This is essentially a two-way swap of day assignments.
+    Execute a same-day swap.
+
+    Per the Option-C design: a swap is a real schedule change, so it creates
+    a NEW schedule version (it does not silently mutate the active one).
+      - The new version copies every assignment from the current active version
+      - swap_in_wi_id moves to `day` (today)
+      - locked_wi_id moves to swap_in's original (future) day
+      - The new version becomes active
+      - The swap is recorded in same_day_swaps for the audit trail
+
+    This means swaps show up in the Versions list and the INOVUES banner,
+    even though they take effect immediately for the installer (no approval).
     """
-    locked = fetch_one("SELECT id FROM work_items WHERE id = :id", id=locked_wi_id)
-    swap_in = fetch_one("SELECT id FROM work_items WHERE id = :id", id=swap_in_wi_id)
+    locked = fetch_one("SELECT id, bay FROM work_items WHERE id = :id", id=locked_wi_id)
+    swap_in = fetch_one("SELECT id, bay FROM work_items WHERE id = :id", id=swap_in_wi_id)
     if not locked or not swap_in:
         raise ValueError("work item not found")
 
     active = fetch_one(
         "SELECT id FROM schedule_versions WHERE is_active = TRUE"
     )
-    vid = active["id"]
+    parent_vid = active["id"]
 
     locked_assign = fetch_one("""
         SELECT day, sequence FROM assignments
         WHERE version_id = :v AND work_item_id = :w
-    """, v=vid, w=locked_wi_id)
+    """, v=parent_vid, w=locked_wi_id)
     swap_in_assign = fetch_one("""
         SELECT day, sequence FROM assignments
         WHERE version_id = :v AND work_item_id = :w
-    """, v=vid, w=swap_in_wi_id)
+    """, v=parent_vid, w=swap_in_wi_id)
     if not locked_assign or not swap_in_assign:
         raise ValueError("assignment missing")
     if locked_assign["day"] != day:
@@ -222,27 +229,52 @@ def execute_swap(locked_wi_id: str, swap_in_wi_id: str, day: int,
     if swap_in_assign["day"] <= day:
         raise ValueError("swap-in item must be from a future day")
 
-    # Find the next available sequence for the destination day
-    next_seq_locked = fetch_one("""
-        SELECT COALESCE(MAX(sequence), 0) + 1 AS next FROM assignments
-        WHERE version_id = :v AND day = :d
-    """, v=vid, d=swap_in_assign["day"])["next"]
-    next_seq_swap = fetch_one("""
-        SELECT COALESCE(MAX(sequence), 0) + 1 AS next FROM assignments
-        WHERE version_id = :v AND day = :d
-    """, v=vid, d=day)["next"]
+    locked_dest_day = swap_in_assign["day"]
+    label = (f"Swap — Bay {swap_in['bay']} pulled into day {day}, "
+             f"Bay {locked['bay']} → day {locked_dest_day}")
 
     with engine().begin() as c:
-        # Swap day assignments
+        # 1. Deactivate current active version
+        c.execute(text(
+            "UPDATE schedule_versions SET is_active = FALSE WHERE is_active = TRUE"
+        ))
+        # 2. Create the new version
+        c.execute(text("""
+            INSERT INTO schedule_versions(label, parent_id, is_active)
+            VALUES (:l, :p, TRUE)
+        """), {"l": label, "p": parent_vid})
+        new_v = c.execute(text("""
+            SELECT id FROM schedule_versions
+            WHERE is_active = TRUE ORDER BY id DESC LIMIT 1
+        """)).scalar()
+
+        # 3. Copy all assignments from parent into the new version
+        c.execute(text("""
+            INSERT INTO assignments(version_id, work_item_id, day, sequence)
+            SELECT :nv, work_item_id, day, sequence
+            FROM assignments WHERE version_id = :pv
+        """), {"nv": new_v, "pv": parent_vid})
+
+        # 4. Apply the swap within the new version
+        next_seq_locked = c.execute(text("""
+            SELECT COALESCE(MAX(sequence), 0) + 1 FROM assignments
+            WHERE version_id = :v AND day = :d
+        """), {"v": new_v, "d": locked_dest_day}).scalar()
+        next_seq_swap = c.execute(text("""
+            SELECT COALESCE(MAX(sequence), 0) + 1 FROM assignments
+            WHERE version_id = :v AND day = :d
+        """), {"v": new_v, "d": day}).scalar()
+
         c.execute(text("""
             UPDATE assignments SET day = :d, sequence = :s
             WHERE version_id = :v AND work_item_id = :w
-        """), {"v": vid, "w": locked_wi_id, "d": swap_in_assign["day"], "s": next_seq_locked})
+        """), {"v": new_v, "w": locked_wi_id, "d": locked_dest_day, "s": next_seq_locked})
         c.execute(text("""
             UPDATE assignments SET day = :d, sequence = :s
             WHERE version_id = :v AND work_item_id = :w
-        """), {"v": vid, "w": swap_in_wi_id, "d": day, "s": next_seq_swap})
-        # Audit
+        """), {"v": new_v, "w": swap_in_wi_id, "d": day, "s": next_seq_swap})
+
+        # 5. Audit row
         c.execute(text("""
             INSERT INTO same_day_swaps(day, locked_work_id, swap_in_work_id,
                                        triggered_by, notes)
@@ -250,8 +282,15 @@ def execute_swap(locked_wi_id: str, swap_in_wi_id: str, day: int,
         """), {"d": day, "l": locked_wi_id, "s": swap_in_wi_id,
                "t": triggered_by, "n": notes})
 
+        # 6. Keep config.active_version_id in sync
+        c.execute(text("""
+            UPDATE config SET value = :v WHERE key = 'active_version_id'
+        """), {"v": str(new_v)})
+
     return {
         "ok": True,
-        "locked_moved_to_day": swap_in_assign["day"],
+        "new_version_id": new_v,
+        "locked_moved_to_day": locked_dest_day,
         "swap_in_moved_to_day": day,
     }
+

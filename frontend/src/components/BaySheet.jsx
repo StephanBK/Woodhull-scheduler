@@ -69,12 +69,12 @@ export default function BaySheet({ bay, currentDay, onClose, onAfterSwap }) {
               <div key={wi.id}>
                 <WorkItemBlock wi={wi} highlight={isToday} />
                 {isToday && (
-                  <button
-                    onClick={() => setSwapFor(wi)}
-                    className="mt-2 w-full border-2 border-warn bg-warn/5 text-warn py-2 font-display text-lg tracking-wider hover:bg-warn hover:text-paper transition-colors"
-                  >
-                    ROOM LOCKED — FIND SWAP
-                  </button>
+                  <TodayActions
+                    wi={wi}
+                    day={currentDay}
+                    onBlocked={() => { onClose(); onAfterSwap?.() }}
+                    onWantSwap={() => setSwapFor(wi)}
+                  />
                 )}
               </div>
             )
@@ -95,6 +95,117 @@ export default function BaySheet({ bay, currentDay, onClose, onAfterSwap }) {
         />
       )}
     </div>
+  )
+}
+
+/**
+ * Actions shown when a bay's work item is scheduled TODAY.
+ *
+ * Two distinct things, deliberately separated:
+ *   1. BLOCK — "we can't do this room today." Posts an unavailability mark.
+ *      Goes through INOVUES approval -> reschedule. This is the real action.
+ *   2. SWAP (opportunistic) — "panels are on the floor, use the time on a
+ *      different bay." Offered AFTER blocking, takes effect immediately.
+ */
+function TodayActions({ wi, day, onBlocked, onWantSwap }) {
+  const [phase, setPhase] = useState('idle') // idle | confirming | blocked
+  const [reason, setReason] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [error, setError] = useState(null)
+
+  // The bay's first room is what we mark unavailable. Most bays touch one
+  // primary room; rooms_text starts with it.
+  const primaryRoom = (wi.rooms && wi.rooms[0]) || null
+
+  async function doBlock() {
+    if (!primaryRoom) { setError('No room code on this work item'); return }
+    setBusy(true); setError(null)
+    try {
+      // Mark every room this work item touches as unavailable today
+      for (const rc of (wi.rooms || [])) {
+        await api.markRoom(rc, day, 'Installer', reason || 'Blocked on-site by installer')
+      }
+      setPhase('blocked')
+    } catch (e) {
+      setError(e.message)
+    } finally { setBusy(false) }
+  }
+
+  if (phase === 'blocked') {
+    return (
+      <div className="mt-2 border-2 border-warn bg-warn/10 p-3 space-y-2">
+        <div className="font-display text-lg tracking-wider text-warn">
+          ROOM BLOCKED
+        </div>
+        <div className="font-mono text-xs text-ink/80">
+          This room is flagged for today. INOVUES will reschedule it to a
+          later day. You can use the time now by installing a different bay
+          whose panels are already on the floor.
+        </div>
+        <button
+          onClick={onWantSwap}
+          className="w-full border-2 border-ink bg-paper py-2 font-display text-base tracking-wider hover:bg-ink hover:text-paper transition-colors"
+        >
+          FIND A BAY TO INSTALL NOW
+        </button>
+        <button
+          onClick={onBlocked}
+          className="w-full font-mono text-[11px] uppercase tracking-wider text-ink/60 underline py-1"
+        >
+          done — back to schedule
+        </button>
+      </div>
+    )
+  }
+
+  if (phase === 'confirming') {
+    return (
+      <div className="mt-2 border-2 border-warn bg-warn/5 p-3 space-y-2">
+        <div className="font-display text-lg tracking-wider text-warn">
+          BLOCK BAY {wi.bay}?
+        </div>
+        <div className="font-mono text-[11px] text-ink/70">
+          Marks {(wi.rooms || []).join(', ') || 'this room'} unavailable for
+          today. INOVUES gets notified and reschedules the work.
+        </div>
+        <textarea
+          value={reason}
+          onChange={e => setReason(e.target.value)}
+          rows={2}
+          placeholder="reason (optional) — e.g. patient in room, door locked"
+          className="w-full border-2 border-ink bg-paper px-2 py-1.5 font-mono text-xs outline-none resize-none"
+        />
+        {error && (
+          <div className="font-mono text-xs text-warn">{error}</div>
+        )}
+        <div className="flex gap-2">
+          <button
+            onClick={doBlock}
+            disabled={busy}
+            className="flex-1 border-2 border-ink bg-warn text-paper py-2 font-display text-base tracking-wider hover:bg-ink transition-colors disabled:opacity-50"
+          >
+            {busy ? 'BLOCKING…' : 'CONFIRM BLOCK'}
+          </button>
+          <button
+            onClick={() => { setPhase('idle'); setError(null) }}
+            disabled={busy}
+            className="border-2 border-ink px-3 font-mono text-xs uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors"
+          >
+            cancel
+          </button>
+        </div>
+      </div>
+    )
+  }
+
+  // idle
+  return (
+    <button
+      onClick={() => setPhase('confirming')}
+      className="mt-2 w-full border-2 border-warn bg-warn/5 text-warn py-2 font-display text-lg tracking-wider hover:bg-warn hover:text-paper transition-colors"
+    >
+      CAN'T DO THIS ROOM — BLOCK IT
+    </button>
   )
 }
 
