@@ -14,4 +14,5 @@ export const api = {
   rooms: () => get('/api/rooms'),
   config: () => get('/api/config'),
   workItem: (id) => get(`/api/work-items/${id}`),
+  floorplan: () => get('/api/floorplan'),
 }
