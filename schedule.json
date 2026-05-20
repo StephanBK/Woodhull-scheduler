@@ -1,0 +1,1623 @@
+{
+  "meta": {
+    "n_days": 24,
+    "total_install_windows": 1134,
+    "n_install_items": 93
+  },
+  "days": [
+    {
+      "day": 1,
+      "week": 1,
+      "unload": {
+        "batch": "01",
+        "bays": "01-05 & 07",
+        "rooms": "RM-01 - 07 & RM-09",
+        "qty": 42
+      },
+      "install": {
+        "total_windows": 42,
+        "bays": [
+          {
+            "bay": "01",
+            "batch": "01",
+            "rooms": "RM-01 (*5B06)",
+            "qty": 5,
+            "panels": {
+              "S1": 2,
+              "S2": 2,
+              "S3": 1
+            },
+            "id": "W01-001"
+          },
+          {
+            "bay": "02",
+            "batch": "01",
+            "rooms": "RM-02 - RM-03 (*5B06A - *5B03E)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S3": 1,
+              "S4": 2
+            },
+            "id": "W01-002"
+          },
+          {
+            "bay": "03",
+            "batch": "01",
+            "rooms": "RM-03 - RM-04 - RM05 (*5B03E - *STAFF PSYCHIATRIST)",
+            "qty": 10,
+            "panels": {
+              "S1": 2,
+              "S2": 4,
+              "S3": 2,
+              "S4": 2
+            },
+            "id": "W01-003"
+          },
+          {
+            "bay": "04",
+            "batch": "01",
+            "rooms": "RM-05 - RM06 (*STAFF PYSCHIATRIST)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S4": 3
+            },
+            "id": "W01-004"
+          },
+          {
+            "bay": "05",
+            "batch": "01",
+            "rooms": "RM-07 (*STAFF PSYCHIATRIST)",
+            "qty": 5,
+            "panels": {
+              "S1": 2,
+              "S2": 2,
+              "S3": 1
+            },
+            "id": "W01-005"
+          },
+          {
+            "bay": "07",
+            "batch": "01",
+            "rooms": "RM-09 (*CONFERENCE ROOM)",
+            "qty": 6,
+            "panels": {
+              "S5": 1,
+              "S6": 2,
+              "S7": 1,
+              "S8": 1,
+              "S9": 1
+            },
+            "id": "W01-006"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 2,
+      "week": 1,
+      "unload": {
+        "batch": "01",
+        "bays": "06-07 & 10",
+        "rooms": "RM-08 - 11 & RM-14 -15",
+        "qty": 42
+      },
+      "install": {
+        "total_windows": 42,
+        "bays": [
+          {
+            "bay": "06",
+            "batch": "01",
+            "rooms": "RM-08 - RM09 (*STAFF ROOM - *CONFERENCE ROOM)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W02-007"
+          },
+          {
+            "bay": "07",
+            "batch": "01",
+            "rooms": "RM-09 - RM10 - RM11 (*CONFERENCE ROOM - *PSYCHIATRIC ADMINISTRATION)",
+            "qty": 16,
+            "panels": {
+              "S5": 1,
+              "S6": 7,
+              "S7": 1,
+              "S8": 4,
+              "S9": 3
+            },
+            "id": "W02-008"
+          },
+          {
+            "bay": "10",
+            "batch": "01",
+            "rooms": "RM-14 - RM15 (*CHAIRMAN'S OFFICE - *5A13 CHAIRMAN DEPT. OF PSYCHIATRY)",
+            "qty": 4,
+            "panels": {
+              "S1": 1,
+              "S2": 2,
+              "S3": 1
+            },
+            "id": "W02-009"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 3,
+      "week": 1,
+      "unload": {
+        "batch": "01",
+        "bays": "08 & 09",
+        "rooms": "RM- 11 - RM-14",
+        "qty": 44
+      },
+      "install": {
+        "total_windows": 44,
+        "bays": [
+          {
+            "bay": "08",
+            "batch": "01",
+            "rooms": "RM-11 - RM12 - RM13 (*PSYCHIATRIC ADMINISTRATION - *ASSOCIATE DIRECTOR)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W03-010"
+          },
+          {
+            "bay": "09",
+            "batch": "01",
+            "rooms": "RM-14 (*CHAIRMAN'S OFFICE)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W03-011"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 4,
+      "week": 1,
+      "unload": {
+        "batch": "01-02",
+        "bays": "10 - 12",
+        "rooms": "RM-14 - RM-17 & COR-4",
+        "qty": 42
+      },
+      "install": {
+        "total_windows": 42,
+        "bays": [
+          {
+            "bay": "10",
+            "batch": "01",
+            "rooms": "RM14 - RM15 - COR-4 (*CHAIRMAN'S OFFICE - *CHAIRMAN DEPT. OF PSYCHIATRY - *CORRIDOR STAIR 7)",
+            "qty": 8,
+            "panels": {
+              "S2": 3,
+              "S3": 4,
+              "S10": 1
+            },
+            "id": "W04-012"
+          },
+          {
+            "bay": "11",
+            "batch": "01",
+            "rooms": "COR-4 - RM16 (*CORRIDOR STAIR 7 - *5A12 ASSOCIATE EXECUTIVE DIRECTOR - MENTAL HEALTH AND PSYCHOLOGICAL SERVICES - DEPT. OF PSYCHOLOGY)",
+            "qty": 12,
+            "panels": {
+              "S1": 1,
+              "S2": 5,
+              "S3": 5,
+              "S10": 1
+            },
+            "id": "W04-013"
+          },
+          {
+            "bay": "12",
+            "batch": "02",
+            "rooms": "RM-16 - RM17 (*5A12 ASSOCIATE EXECUTIVE DIRECTOR- MENTAL HEALTH AND PSYCHOLOGICAL SERVICES-DEPT OF PSYCHOLOGY - *5A11 ASSISTED OUTPATIENT TREATMENT)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W04-014"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 5,
+      "week": 1,
+      "unload": {
+        "batch": "02",
+        "bays": "13 - 14",
+        "rooms": "RM-18 - RM-22",
+        "qty": 44
+      },
+      "install": {
+        "total_windows": 44,
+        "bays": [
+          {
+            "bay": "13",
+            "batch": "02",
+            "rooms": "RM-18 - RM19 (*5A10 ASSOCIATE DIRECTOR-NURSING-DEPT OF PSYCHIATRY - *5A9 ASSISTED OUTPATIENT TREATMENT)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W05-015"
+          },
+          {
+            "bay": "14",
+            "batch": "02",
+            "rooms": "RM-20 - RM21 - RM22 (*5A6 ASSISTED OUTPATIENT TREATMENT - *5A5 ASSISTED OUTPATIENT TREATMENT - *5A4 ASSISTED OUTPATIENT TREATMENT)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W05-016"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 6,
+      "week": 2,
+      "unload": {
+        "batch": "02-03",
+        "bays": "15 - 18",
+        "rooms": "RM-23 - RM-25 & COR-6",
+        "qty": 48
+      },
+      "install": {
+        "total_windows": 48,
+        "bays": [
+          {
+            "bay": "15",
+            "batch": "02",
+            "rooms": "RM-23 - RM24 - RM25 (*5A3 ASSISTED OUTPATIENT TREATMENT - *5A2 ASSISTED OUTPATIENT TREATMENT - *5A1 ASSISTED OUTPATIENT TREATMENT)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W06-017"
+          },
+          {
+            "bay": "16",
+            "batch": "02",
+            "rooms": "RM-26 - RM27 - RM28 (*5A25 PSYCHOLOGY OFFICE - *5A26 QUALITY AND INFORMATION MANAGEMENT OFFICE - *ELEVATOR LOBBY NEAR STAIR 6)",
+            "qty": 10,
+            "panels": {
+              "S1": 2,
+              "S2": 4,
+              "S3": 4
+            },
+            "id": "W06-018"
+          },
+          {
+            "bay": "17",
+            "batch": "02",
+            "rooms": "COR-6 (*CORRIDOR STAIR 6)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S3": 1,
+              "S4": 2
+            },
+            "id": "W06-019"
+          },
+          {
+            "bay": "18",
+            "batch": "03",
+            "rooms": "COR-6 (*CORRIDOR STAIR 6)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S3": 1,
+              "S4": 2
+            },
+            "id": "W06-020"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 7,
+      "week": 2,
+      "unload": {
+        "batch": "03",
+        "bays": "19 - 21",
+        "rooms": "RM-31 - RM-36",
+        "qty": 56
+      },
+      "install": {
+        "total_windows": 56,
+        "bays": [
+          {
+            "bay": "19",
+            "batch": "03",
+            "rooms": "RM-29 - RM30 - RM31 (*5A100 *5A101 -*5A105 DIRECTOR-OUTPATIENT SERVICES-DEPT OF PSYCHIATRY)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W07-021"
+          },
+          {
+            "bay": "20",
+            "batch": "03",
+            "rooms": "RM-31 - RM32 - RM33 (*5A105 DIRECTOR-OUTPATIENT SERVICES-DEPT OF PSYCHIATRY - *5A108 SOCIAL WORKER SUPERVISOR-CHILD AND ADOLESCENT SERVICES - *5A109 SOCIAL WORKER-CHILD AND ADOLESCENT SERVICES)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W07-022"
+          },
+          {
+            "bay": "21",
+            "batch": "03",
+            "rooms": "RM-34 - RM35 - RM36 (*5A112 CLINIC MANAGER/PSYCHOLOGIST SUPERVISOR-CHILD AND ADOLESCENT SUPERVISOR - *5A113 PSYCHOLOGIST-CHILD AND ADOLESCENT SERVICES - *5A114 PSYCHOLOGIST-CHILD AND ADOLESCENT SERVICES)",
+            "qty": 12,
+            "panels": {
+              "S5": 1,
+              "S6": 5,
+              "S7": 1,
+              "S8": 3,
+              "S9": 2
+            },
+            "id": "W07-023"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 8,
+      "week": 2,
+      "unload": {
+        "batch": "03",
+        "bays": "21-23",
+        "rooms": "RM-36 - RM-42",
+        "qty": 54
+      },
+      "install": {
+        "total_windows": 54,
+        "bays": [
+          {
+            "bay": "21",
+            "batch": "03",
+            "rooms": "RM-36 (*5A114 PSYCHOLOGIST-CHILD AND ADOLESCENT SERVICES)",
+            "qty": 10,
+            "panels": {
+              "S5": 1,
+              "S6": 4,
+              "S7": 1,
+              "S8": 2,
+              "S9": 2
+            },
+            "id": "W08-024"
+          },
+          {
+            "bay": "22",
+            "batch": "03",
+            "rooms": "RM-37 - RM38 - RM39 (*5A115 PSYCHOLOGIST-CHILD AND ADOLESCENT SERVICE - *5A116 PSYCHOLOGIST-CHILD AND ADOLESCENT SERVICES - *5A117 SOCIAL WORKER-CHILD AND ADOLESCENT SERVICES)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W08-025"
+          },
+          {
+            "bay": "23",
+            "batch": "03",
+            "rooms": "RM-40 - RM41 - RM42 (*5A120 SOCIAL WORKER SUPERVISOR- ADULT SERVICES - *5A121 PSYCHIATRIST ADULT SERVICES - *5A124 PSYCHIATRIST ADULT SERVICES)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W08-026"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 9,
+      "week": 2,
+      "unload": {
+        "batch": "03-04",
+        "bays": "24-28",
+        "rooms": "RM-43 - RM-46 & COR-8",
+        "qty": 53
+      },
+      "install": {
+        "total_windows": 53,
+        "bays": [
+          {
+            "bay": "24",
+            "batch": "03",
+            "rooms": "RM-43 - RM-44 - RM-45 (*5A124 PSYCHIATRIST ADULT SERVICES - *5A127 PSYCHIATRIST ADULT SERVICES - *5A128 CLINIC MANAGER/SOCIAL WORK SUPERVISOR-ADULT OUTPATIENT SERVICES)",
+            "qty": 10,
+            "panels": {
+              "S5": 1,
+              "S6": 4,
+              "S7": 1,
+              "S8": 2,
+              "S9": 2
+            },
+            "id": "W09-027"
+          },
+          {
+            "bay": "24",
+            "batch": "03",
+            "rooms": "RM-44 - RM-45 (*5A127 PSYCHIATRIST ADULT SERVICES - *5A128 CLINIC MANAGER/SOCIAL WORK SUPERVISOR-ADULT OUTPATIENT SERVICES)",
+            "qty": 12,
+            "panels": {
+              "S5": 1,
+              "S6": 5,
+              "S7": 1,
+              "S8": 3,
+              "S9": 2
+            },
+            "id": "W09-028"
+          },
+          {
+            "bay": "25",
+            "batch": "03",
+            "rooms": "RM-46 (*ELEVATOR LOBBY NEAR STAIR 5)",
+            "qty": 10,
+            "panels": {
+              "S1": 2,
+              "S2": 4,
+              "S3": 4
+            },
+            "id": "W09-029"
+          },
+          {
+            "bay": "26",
+            "batch": "03",
+            "rooms": "COR-8 (*CORRIDOR STAIR 5)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S3": 1,
+              "S4": 2
+            },
+            "id": "W09-030"
+          },
+          {
+            "bay": "27",
+            "batch": "04",
+            "rooms": "COR-1 (*CORRIDOR STAIR 8-10)",
+            "qty": 5,
+            "panels": {
+              "S1": 2,
+              "S2": 2,
+              "S3": 1
+            },
+            "id": "W09-031"
+          },
+          {
+            "bay": "28",
+            "batch": "04",
+            "rooms": "COR-1 (*CORRIDOR STAIR 8-10)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S3": 1,
+              "S4": 2
+            },
+            "id": "W09-032"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 10,
+      "week": 2,
+      "unload": {
+        "batch": "04",
+        "bays": "29-32 & 33",
+        "rooms": "RM-47 - RM-49 & COR-1",
+        "qty": 54
+      },
+      "install": {
+        "total_windows": 54,
+        "bays": [
+          {
+            "bay": "29",
+            "batch": "04",
+            "rooms": "COR-1 (*CORRIDOR STAIR 8-10)",
+            "qty": 10,
+            "panels": {
+              "S1": 2,
+              "S2": 4,
+              "S3": 2,
+              "S4": 2
+            },
+            "id": "W10-033"
+          },
+          {
+            "bay": "32",
+            "batch": "04",
+            "rooms": "RM-47 - RM-48 (*5A130 ENVIRONMENTAL SERVICES - *5A131 EMPTY ROOM - *5A132 EMPTY ROOM)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W10-034"
+          },
+          {
+            "bay": "33",
+            "batch": "04",
+            "rooms": "RM-48 - RM-49 (*5A132 EMPTY ROOM - *5A133 PSYCHIATRIC MEDICAL RECORDS)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W10-035"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 11,
+      "week": 3,
+      "unload": {
+        "batch": "04",
+        "bays": "30-34 & 35",
+        "rooms": "RM-49 - RM-52 & COR-1",
+        "qty": 52
+      },
+      "install": {
+        "total_windows": 52,
+        "bays": [
+          {
+            "bay": "30",
+            "batch": "04",
+            "rooms": "COR-1 (*CORRIDOR STAIR 8-10)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S4": 3
+            },
+            "id": "W11-036"
+          },
+          {
+            "bay": "34",
+            "batch": "04",
+            "rooms": "RM-49 - RM-50 (*5A133 PSYCHIATRIC MEDICAL RECORDS *5A134 EMPTY ROOM)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W11-037"
+          },
+          {
+            "bay": "35",
+            "batch": "04",
+            "rooms": "RM-51 - RM-52 (*5A135 CONFERENCE/GROUP THERAPY ROOM A - *5A138 ACUPUNCTURE ROOM)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W11-038"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 12,
+      "week": 3,
+      "unload": {
+        "batch": "04",
+        "bays": "31 & 36-38",
+        "rooms": "RM-52 - RM-56 & COR-1",
+        "qty": 54
+      },
+      "install": {
+        "total_windows": 54,
+        "bays": [
+          {
+            "bay": "31",
+            "batch": "04",
+            "rooms": "COR-1 (*CORRIDOR STAIR 8-10)",
+            "qty": 5,
+            "panels": {
+              "S1": 2,
+              "S2": 2,
+              "S3": 1
+            },
+            "id": "W12-039"
+          },
+          {
+            "bay": "36",
+            "batch": "04",
+            "rooms": "RM-52 - RM-53 (*5A138 ACUPUNCTURE ROOM - *5A139 MENTAL HYGIENE LEGAL SERVICES)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W12-040"
+          },
+          {
+            "bay": "37",
+            "batch": "04",
+            "rooms": "RM-54 - RM-55 (*5A140 CONFERENCE/GROUP THERAPY ROOM - *5A141 STAFF LOUNGE)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W12-041"
+          },
+          {
+            "bay": "38",
+            "batch": "04",
+            "rooms": "RM-56 (*5B105A STORAGE)",
+            "qty": 5,
+            "panels": {
+              "S1": 2,
+              "S2": 2,
+              "S3": 1
+            },
+            "id": "W12-042"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 13,
+      "week": 3,
+      "unload": {
+        "batch": "04-05",
+        "bays": "39-45",
+        "rooms": "RM-57 - RM-63 & COR-2",
+        "qty": 54
+      },
+      "install": {
+        "total_windows": 54,
+        "bays": [
+          {
+            "bay": "39",
+            "batch": "04",
+            "rooms": "RM-57 - RM-58 (*5B105A STORAGE - *5B105A STORAGE)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S4": 3
+            },
+            "id": "W13-043"
+          },
+          {
+            "bay": "40",
+            "batch": "04",
+            "rooms": "RM-59 - RM-60 (*5B105A STORAGE - *5B105A STORAGE)",
+            "qty": 10,
+            "panels": {
+              "S1": 2,
+              "S2": 4,
+              "S3": 2,
+              "S4": 2
+            },
+            "id": "W13-044"
+          },
+          {
+            "bay": "41",
+            "batch": "04",
+            "rooms": "RM-61 - RM-62 (*5B105A STORAGE - *5B105A STORAGE)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S3": 1,
+              "S4": 2
+            },
+            "id": "W13-045"
+          },
+          {
+            "bay": "42",
+            "batch": "04",
+            "rooms": "RM-63 (*5B105A STORAGE)",
+            "qty": 5,
+            "panels": {
+              "S1": 2,
+              "S2": 2,
+              "S3": 1
+            },
+            "id": "W13-046"
+          },
+          {
+            "bay": "43",
+            "batch": "05",
+            "rooms": "COR-2 (*CORRIDOR STAIR 5-11)",
+            "qty": 5,
+            "panels": {
+              "S1": 2,
+              "S2": 2,
+              "S3": 1
+            },
+            "id": "W13-047"
+          },
+          {
+            "bay": "44",
+            "batch": "05",
+            "rooms": "COR-2 (*CORRIDOR STAIR 5-11)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S3": 1,
+              "S4": 2
+            },
+            "id": "W13-048"
+          },
+          {
+            "bay": "45",
+            "batch": "05",
+            "rooms": "COR-2 (*CORRIDOR STAIR 5-11)",
+            "qty": 10,
+            "panels": {
+              "S1": 2,
+              "S2": 4,
+              "S3": 2,
+              "S4": 2
+            },
+            "id": "W13-049"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 14,
+      "week": 3,
+      "unload": {
+        "batch": "05",
+        "bays": "46-49",
+        "rooms": "RM-64 - RM-66 & COR-2",
+        "qty": 54
+      },
+      "install": {
+        "total_windows": 54,
+        "bays": [
+          {
+            "bay": "46",
+            "batch": "05",
+            "rooms": "COR-2 (*CORRIDOR STAIR 5-11)",
+            "qty": 5,
+            "panels": {
+              "S1": 1,
+              "S2": 2,
+              "S4": 2
+            },
+            "id": "W14-050"
+          },
+          {
+            "bay": "47",
+            "batch": "05",
+            "rooms": "COR-2 (*CORRIDOR STAIR 5-11)",
+            "qty": 5,
+            "panels": {
+              "S1": 2,
+              "S2": 2,
+              "S3": 1
+            },
+            "id": "W14-051"
+          },
+          {
+            "bay": "48",
+            "batch": "05",
+            "rooms": "RM-64 - RM-65 (*MEN'S RESTROOM OPP. 5B105A STORAGE - *NURSING EDUCATION STATION)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W14-052"
+          },
+          {
+            "bay": "49",
+            "batch": "05",
+            "rooms": "RM-65 - RM66 (*NURSING EDUCATION STATION - *5A233 CLASSROOM)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W14-053"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 15,
+      "week": 3,
+      "unload": {
+        "batch": "05",
+        "bays": "46, 50- 51 & 54",
+        "rooms": "RM-66 - RM-67 & RM-71 & COR-2",
+        "qty": 52
+      },
+      "install": {
+        "total_windows": 52,
+        "bays": [
+          {
+            "bay": "46",
+            "batch": "05",
+            "rooms": "COR-2 (*CORRIDOR STAIR 5-11)",
+            "qty": 3,
+            "panels": {
+              "S1": 1,
+              "S2": 1,
+              "S4": 1
+            },
+            "id": "W15-054"
+          },
+          {
+            "bay": "50",
+            "batch": "05",
+            "rooms": "RM-66 - RM67 (*5A233 CLASSROOM - *5A234 CLASSROOM)",
+            "qty": 12,
+            "panels": {
+              "S5": 1,
+              "S6": 5,
+              "S7": 1,
+              "S8": 3,
+              "S9": 2
+            },
+            "id": "W15-055"
+          },
+          {
+            "bay": "50",
+            "batch": "05",
+            "rooms": "RM-67 (*5A235 CLASSROOM)",
+            "qty": 10,
+            "panels": {
+              "S5": 1,
+              "S6": 4,
+              "S7": 1,
+              "S8": 2,
+              "S9": 2
+            },
+            "id": "W15-056"
+          },
+          {
+            "bay": "51",
+            "batch": "05",
+            "rooms": "RM-67 (*5A235 CLASSROOM)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W15-057"
+          },
+          {
+            "bay": "54",
+            "batch": "05",
+            "rooms": "RM-71 (*EMPTY ROOM)",
+            "qty": 5,
+            "panels": {
+              "S1": 2,
+              "S2": 2,
+              "S3": 1
+            },
+            "id": "W15-058"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 16,
+      "week": 4,
+      "unload": {
+        "batch": "05",
+        "bays": "52-53 & 55",
+        "rooms": "RM-67 - RM-70 & RM-72 - RM-73",
+        "qty": 52
+      },
+      "install": {
+        "total_windows": 52,
+        "bays": [
+          {
+            "bay": "52",
+            "batch": "05",
+            "rooms": "RM-67 - RM68 (*5A235 CLASSROOM - *GROUP THERAPY ROOM B)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W16-059"
+          },
+          {
+            "bay": "53",
+            "batch": "05",
+            "rooms": "RM-69 (*GROUP THERAPY ROOM C)",
+            "qty": 10,
+            "panels": {
+              "S5": 1,
+              "S6": 4,
+              "S7": 1,
+              "S8": 2,
+              "S9": 2
+            },
+            "id": "W16-060"
+          },
+          {
+            "bay": "53",
+            "batch": "05",
+            "rooms": "RM-70 (*STAFF LOUNGE)",
+            "qty": 12,
+            "panels": {
+              "S5": 1,
+              "S6": 5,
+              "S7": 1,
+              "S8": 3,
+              "S9": 2
+            },
+            "id": "W16-061"
+          },
+          {
+            "bay": "55",
+            "batch": "05",
+            "rooms": "RM-72 - RM73 (*5B202C EMPTY ROOM - *5B202B EMPTY ROOM)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S4": 3
+            },
+            "id": "W16-062"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 17,
+      "week": 4,
+      "unload": {
+        "batch": "05-06",
+        "bays": "56-60",
+        "rooms": "RM-74 - RM-80 & COR-8",
+        "qty": 53
+      },
+      "install": {
+        "total_windows": 53,
+        "bays": [
+          {
+            "bay": "56",
+            "batch": "05",
+            "rooms": "RM-74 - RM75 (*5B203A EMPTY ROOM - *5B204F EMPTY ROOM)",
+            "qty": 10,
+            "panels": {
+              "S1": 2,
+              "S2": 4,
+              "S3": 2,
+              "S4": 2
+            },
+            "id": "W17-063"
+          },
+          {
+            "bay": "57",
+            "batch": "05",
+            "rooms": "RM-76 - RM77 (*5B204E EMPTY ROOM - *5B204D EMPTY ROOM)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S3": 1,
+              "S4": 2
+            },
+            "id": "W17-064"
+          },
+          {
+            "bay": "58",
+            "batch": "05",
+            "rooms": "RM-78 (*5B205 CREATIVE ARTS THERAPY ROOM)",
+            "qty": 5,
+            "panels": {
+              "S1": 2,
+              "S2": 2,
+              "S3": 1
+            },
+            "id": "W17-065"
+          },
+          {
+            "bay": "59",
+            "batch": "06",
+            "rooms": "COR-8 (*CORRIDOR STAIR 5)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S3": 1,
+              "S4": 2
+            },
+            "id": "W17-066"
+          },
+          {
+            "bay": "60",
+            "batch": "06",
+            "rooms": "RM-79 - RM80 (*5A200 SENIOR ASSOCIATE DIRECTOR- OUTPATIENT PSYCHIATRY - *5A201 SENIOR SOCIAL-ADULT OUTPATIENT SERVICES)",
+            "qty": 8,
+            "panels": {
+              "S5": 1,
+              "S6": 3,
+              "S7": 1,
+              "S8": 2,
+              "S9": 1
+            },
+            "id": "W17-067"
+          },
+          {
+            "bay": "60",
+            "batch": "06",
+            "rooms": "RM-80 - RM-81 (*5A201 SENIOR SOCIAL-ADULT OUTPATIENT SERVICES - *5A204 HEAD NURSE-ADULT OUTPATIENT SERVICES)",
+            "qty": 14,
+            "panels": {
+              "S5": 1,
+              "S6": 6,
+              "S7": 1,
+              "S8": 3,
+              "S9": 3
+            },
+            "id": "W17-068"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 18,
+      "week": 4,
+      "unload": {
+        "batch": "06",
+        "bays": "61-63",
+        "rooms": "RM-82 - RM-90",
+        "qty": 60
+      },
+      "install": {
+        "total_windows": 60,
+        "bays": [
+          {
+            "bay": "61",
+            "batch": "06",
+            "rooms": "RM-82 - RM83 - RM84 (*5A205 PSYCHIATRIST-ADULT OUTPATIENT SERVICES - *5A208 SOCIAL WORKER-ADULT OUTPATIENT SERVICES - *5A209 PSYCHIATRIST-ADULT OUTPATIENT SERVICES)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W18-069"
+          },
+          {
+            "bay": "62",
+            "batch": "06",
+            "rooms": "RM-85 - RM86 - RM87 (*5A212 SOCIAL WORKER-ADULT OUTPATIENT SERVICES - *5A213 SENIOR SOCIAL WORKER- ADULT OUTPATIENT SERVICES - *5A215 DEIRDRE NEWTON)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W18-070"
+          },
+          {
+            "bay": "63",
+            "batch": "06",
+            "rooms": "RM-88 - RM89 - RM90 (*5A216 SOCIAL WORKER-ADULT OUTPATIENT SERVICES - *5A217 PSYCHOLOGIST OFFICE - *5A218 EMPTY ROOM)",
+            "qty": 16,
+            "panels": {
+              "S5": 1,
+              "S6": 7,
+              "S7": 1,
+              "S8": 4,
+              "S9": 3
+            },
+            "id": "W18-071"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 19,
+      "week": 4,
+      "unload": {
+        "batch": "06",
+        "bays": "63-66",
+        "rooms": "RM-88 & RM-91 - RM-98",
+        "qty": 60
+      },
+      "install": {
+        "total_windows": 60,
+        "bays": [
+          {
+            "bay": "63",
+            "batch": "06",
+            "rooms": "RM-88 (*5A216 SOCIAL WORKER-ADULT OUTPATIENT SERVICES)",
+            "qty": 6,
+            "panels": {
+              "S5": 1,
+              "S6": 2,
+              "S7": 1,
+              "S8": 1,
+              "S9": 1
+            },
+            "id": "W19-072"
+          },
+          {
+            "bay": "64",
+            "batch": "06",
+            "rooms": "RM-91 - RM92 - RM93 (*5A221 EMPTY ROOM - *5A222 EMPTY ROOM - *EMPTY ROOM)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W19-073"
+          },
+          {
+            "bay": "65",
+            "batch": "06",
+            "rooms": "RM-94 - RM95 - RM96 (*5A226 EMPTY ROOM - *EMPTY ROOM - *5A229 SENIOR ASSOCIATE DIRECTOR)",
+            "qty": 22,
+            "panels": {
+              "S5": 2,
+              "S6": 9,
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W19-074"
+          },
+          {
+            "bay": "66",
+            "batch": "06",
+            "rooms": "RM-97 (*5A242A EMPTY ROOM)",
+            "qty": 4,
+            "panels": {
+              "S1": 1,
+              "S2": 2,
+              "S3": 1
+            },
+            "id": "W19-075"
+          },
+          {
+            "bay": "66",
+            "batch": "06",
+            "rooms": "RM-97 - RM98 (*5A242A EMPTY ROOM - *ELEVATOR LOBBY NEAR STAIR 4)",
+            "qty": 6,
+            "panels": {
+              "S1": 1,
+              "S2": 2,
+              "S3": 3
+            },
+            "id": "W19-076"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 20,
+      "week": 4,
+      "unload": {
+        "batch": "06-07",
+        "bays": "67-74",
+        "rooms": "RM-99 - RM-102 & COR-3 & COR-10",
+        "qty": 61
+      },
+      "install": {
+        "total_windows": 61,
+        "bays": [
+          {
+            "bay": "67",
+            "batch": "06",
+            "rooms": "COR-10 (*CORRIDOR STAIR 4)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S3": 1,
+              "S4": 2
+            },
+            "id": "W20-077"
+          },
+          {
+            "bay": "68",
+            "batch": "07",
+            "rooms": "COR-3 (*CORRIDOR STAIR 4-12)",
+            "qty": 5,
+            "panels": {
+              "S1": 2,
+              "S2": 2,
+              "S3": 1
+            },
+            "id": "W20-078"
+          },
+          {
+            "bay": "69",
+            "batch": "07",
+            "rooms": "COR-3 (*CORRIDOR STAIR 4-12)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S3": 1,
+              "S4": 2
+            },
+            "id": "W20-079"
+          },
+          {
+            "bay": "70",
+            "batch": "07",
+            "rooms": "COR-3 (*CORRIDOR STAIR 4-12)",
+            "qty": 10,
+            "panels": {
+              "S1": 2,
+              "S2": 4,
+              "S3": 2,
+              "S4": 2
+            },
+            "id": "W20-080"
+          },
+          {
+            "bay": "71",
+            "batch": "07",
+            "rooms": "COR-3 (*CORRIDOR STAIR 4-12)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S4": 3
+            },
+            "id": "W20-081"
+          },
+          {
+            "bay": "73",
+            "batch": "07",
+            "rooms": "RM-99 - RM100 (*MEN'S RESTROOM - *UNDER RENOVATION)",
+            "qty": 11,
+            "panels": {
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W20-082"
+          },
+          {
+            "bay": "74",
+            "batch": "07",
+            "rooms": "RM-101 - RM102 (*UNDER RENOVATION - *UNDER RENOVATION)",
+            "qty": 11,
+            "panels": {
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W20-083"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 21,
+      "week": 5,
+      "unload": {
+        "batch": "07-08",
+        "bays": "72 & 75-79",
+        "rooms": "RM-103 - RM-106 & RM-111& COR-3 & COR-10",
+        "qty": 59
+      },
+      "install": {
+        "total_windows": 59,
+        "bays": [
+          {
+            "bay": "72",
+            "batch": "07",
+            "rooms": "COR-3 (*CORRIDOR STAIR 4-12)",
+            "qty": 5,
+            "panels": {
+              "S1": 2,
+              "S2": 2,
+              "S3": 1
+            },
+            "id": "W21-084"
+          },
+          {
+            "bay": "75",
+            "batch": "07",
+            "rooms": "RM-103 - RM104 (*UNDER RENOVATION - *UNDER RENOVATION)",
+            "qty": 11,
+            "panels": {
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W21-085"
+          },
+          {
+            "bay": "76",
+            "batch": "07",
+            "rooms": "RM-105 (*UNDER RENOVATION)",
+            "qty": 11,
+            "panels": {
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W21-086"
+          },
+          {
+            "bay": "77",
+            "batch": "07",
+            "rooms": "RM-105 - RM106 (*UNDER RENOVATION - *EMPTY ROOM NEAR STAIR 3)",
+            "qty": 12,
+            "panels": {
+              "S1": 1,
+              "S2": 5,
+              "S3": 5,
+              "S10": 1
+            },
+            "id": "W21-087"
+          },
+          {
+            "bay": "78",
+            "batch": "07",
+            "rooms": "RM-111 (*LOBBY NEAR STAIR 3)",
+            "qty": 12,
+            "panels": {
+              "S1": 1,
+              "S2": 5,
+              "S3": 5,
+              "S10": 1
+            },
+            "id": "W21-088"
+          },
+          {
+            "bay": "79",
+            "batch": "08",
+            "rooms": "COR-10 (*CORRIDOR STAIR 4)",
+            "qty": 8,
+            "panels": {
+              "S1": 2,
+              "S2": 3,
+              "S3": 1,
+              "S4": 2
+            },
+            "id": "W21-089"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 22,
+      "week": 5,
+      "unload": {
+        "batch": "08",
+        "bays": "80-83",
+        "rooms": "RM-107 - RM-1110",
+        "qty": 44
+      },
+      "install": {
+        "total_windows": 44,
+        "bays": [
+          {
+            "bay": "80",
+            "batch": "08",
+            "rooms": "RM-107 (*UNDER RENOVATION)",
+            "qty": 11,
+            "panels": {
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W22-090"
+          },
+          {
+            "bay": "81",
+            "batch": "08",
+            "rooms": "RM-108 (*UNDER RENOVATION)",
+            "qty": 11,
+            "panels": {
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W22-091"
+          },
+          {
+            "bay": "82",
+            "batch": "08",
+            "rooms": "RM-108 - RM109 (*UNDER RENOVATION - *UNDER RENOVATION)",
+            "qty": 11,
+            "panels": {
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W22-092"
+          },
+          {
+            "bay": "83",
+            "batch": "08",
+            "rooms": "RM-109 - RM110 (*UNDER RENOVATION - *UNDER RENOVATION)",
+            "qty": 11,
+            "panels": {
+              "S7": 2,
+              "S8": 5,
+              "S9": 4
+            },
+            "id": "W22-093"
+          }
+        ]
+      },
+      "inspect": []
+    },
+    {
+      "day": 23,
+      "week": 5,
+      "unload": null,
+      "install": {
+        "total_windows": null,
+        "bays": []
+      },
+      "inspect": [
+        {
+          "batch": "1-4",
+          "bays": "1-42",
+          "rooms": "RM-01 - RM-63"
+        },
+        {
+          "batch": "1-4",
+          "bays": "1-42",
+          "rooms": "RM-01 - RM-63"
+        }
+      ]
+    },
+    {
+      "day": 24,
+      "week": 5,
+      "unload": null,
+      "install": {
+        "total_windows": null,
+        "bays": []
+      },
+      "inspect": [
+        {
+          "batch": "5-8",
+          "bays": "43-83",
+          "rooms": "RM-64 - RM-111"
+        },
+        {
+          "batch": "5-8",
+          "bays": "43-83",
+          "rooms": "RM-64 - RM-111"
+        },
+        {
+          "batch": "5-8",
+          "bays": "43-83",
+          "rooms": "TOTAL ="
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,21 @@
+__pycache__/
+*.pyc
+*.pyo
+*.db
+*.sqlite
+.env
+.venv/
+venv/
+node_modules/
+frontend/dist/
+.DS_Store
+*.log
+
+# Local extraction artifacts
+page_*.txt
+page_*.json
+extract.py
+parse.py
+add_ids.py
+load.py
+schema.sql
