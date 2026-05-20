@@ -13,8 +13,6 @@ import { dayLabel, dayDateOnly } from '../dates'
 export default function HospitalView({ projectStartDate }) {
   const [rooms, setRooms] = useState(null)
   const [marks, setMarks] = useState([])
-  const [search, setSearch] = useState('')
-  const [openRoom, setOpenRoom] = useState(null)
   const [error, setError] = useState(null)
   const [tab, setTab] = useState('schedule')
 
@@ -25,17 +23,6 @@ export default function HospitalView({ projectStartDate }) {
     } catch (e) { setError(e.message) }
   }
   useEffect(() => { refresh() }, [])
-
-  const filtered = useMemo(() => {
-    if (!rooms) return []
-    const q = search.trim().toLowerCase()
-    let list = rooms.filter(r => r.scheduled.length > 0)
-    if (q) list = list.filter(r =>
-      r.code.toLowerCase().includes(q) ||
-      (r.description || '').toLowerCase().includes(q)
-    )
-    return list
-  }, [rooms, search])
 
   const marksByRoomDay = useMemo(() => {
     const m = {}
@@ -76,7 +63,6 @@ export default function HospitalView({ projectStartDate }) {
       <div className="flex border-2 border-ink rounded-sm overflow-hidden">
         {[
           { id: 'schedule', label: 'Schedule' },
-          { id: 'browse',  label: 'Browse rooms' },
           { id: 'pending', label: `Pending (${marks.length})` },
         ].map(t => (
           <button key={t.id} onClick={() => setTab(t.id)}
@@ -89,122 +75,18 @@ export default function HospitalView({ projectStartDate }) {
       </div>
 
       {tab === 'schedule' && (
-        <ScheduleTab projectStartDate={projectStartDate} />
-      )}
-
-      {tab === 'browse' && (
-        <>
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="search room or description…"
-            className="w-full border-2 border-ink bg-paper px-3 py-2 font-mono text-sm outline-none focus:bg-flag/10"
-          />
-          {!rooms && (
-            <div className="border-2 border-rule p-6 text-center font-mono text-sm text-ink/50">
-              loading rooms…
-            </div>
-          )}
-          <ul className="space-y-2">
-            {filtered.map(room => (
-              <RoomRow
-                key={room.code}
-                room={room}
-                marks={marksByRoomDay[room.code] || {}}
-                expanded={openRoom === room.code}
-                onToggle={() => setOpenRoom(openRoom === room.code ? null : room.code)}
-                onMarkDay={onMarkDay}
-                onCancel={onCancel}
-              />
-            ))}
-            {filtered.length === 0 && rooms && (
-              <li className="text-center font-mono text-sm text-ink/50 py-6">
-                no rooms match "{search}"
-              </li>
-            )}
-          </ul>
-        </>
+        <ScheduleTab
+          projectStartDate={projectStartDate}
+          marksByRoomDay={marksByRoomDay}
+          onMarkDay={onMarkDay}
+          onCancel={onCancel}
+        />
       )}
 
       {tab === 'pending' && (
         <PendingList marks={marks} onCancel={onCancel} />
       )}
     </div>
-  )
-}
-
-function RoomRow({ room, marks, expanded, onToggle, onMarkDay, onCancel }) {
-  const markedDays = Object.keys(marks).map(Number)
-  return (
-    <li className="border-2 border-ink bg-paper">
-      <button
-        onClick={onToggle}
-        className="w-full px-3 py-3 flex items-baseline gap-2 text-left hover:bg-ink/5 transition-colors"
-      >
-        <span className="font-mono text-sm font-semibold">{room.code}</span>
-        {room.description && (
-          <span className="font-mono text-[10px] uppercase tracking-wider text-ink/60 truncate">
-            {room.description}
-          </span>
-        )}
-        <span className="ml-auto font-mono text-xs whitespace-nowrap">
-          {room.scheduled.length} day{room.scheduled.length === 1 ? '' : 's'}
-        </span>
-        {markedDays.length > 0 && (
-          <span className="sticker-warn">{markedDays.length}!</span>
-        )}
-        <span className="font-mono text-ink/40">{expanded ? '▼' : '►'}</span>
-      </button>
-
-      {expanded && (
-        <div className="border-t-2 border-ink p-3">
-          <div className="font-mono text-[10px] uppercase tracking-wider text-ink/60 mb-2">
-            scheduled days — tap to mark unavailable
-          </div>
-          <div className="flex flex-wrap gap-2">
-            {Array.from(new Set(room.scheduled.map(s => s.day)))
-              .sort((a, b) => a - b)
-              .map(d => {
-                const mark = marks[d]
-                return (
-                  <DayButton
-                    key={d}
-                    day={d}
-                    marked={!!mark}
-                    onMark={() => onMarkDay(room.code, d)}
-                    onCancel={() => onCancel(mark.id)}
-                  />
-                )
-              })}
-          </div>
-        </div>
-      )}
-    </li>
-  )
-}
-
-function DayButton({ day, marked, onMark, onCancel }) {
-  if (marked) {
-    return (
-      <button onClick={onCancel}
-        className="border-2 border-warn bg-warn text-paper px-3 py-2 leading-tight hover:opacity-90"
-      >
-        <div className="font-display text-xl">DAY {day}</div>
-        <div className="font-mono text-[9px] uppercase tracking-wider opacity-90">
-          marked · tap to cancel
-        </div>
-      </button>
-    )
-  }
-  return (
-    <button onClick={onMark}
-      className="border-2 border-ink bg-paper px-3 py-2 leading-tight hover:bg-ink hover:text-paper transition-colors"
-    >
-      <div className="font-display text-xl">DAY {day}</div>
-      <div className="font-mono text-[9px] uppercase tracking-wider opacity-60">
-        tap to mark
-      </div>
-    </button>
   )
 }
 
@@ -246,10 +128,12 @@ function PendingList({ marks, onCancel }) {
  * Hospital-friendly: rooms + window counts only, no panel/bay jargon.
  * Tap a day to expand its room list.
  */
-function ScheduleTab({ projectStartDate }) {
+function ScheduleTab({ projectStartDate, marksByRoomDay, onMarkDay, onCancel }) {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)
   const [openDay, setOpenDay] = useState(null)
+  const [search, setSearch] = useState('')
+  const [busyChip, setBusyChip] = useState(null) // "room|day" while a toggle is in flight
 
   useEffect(() => {
     api.hospitalSchedule()
@@ -257,10 +141,47 @@ function ScheduleTab({ projectStartDate }) {
       .catch(e => setError(e.message))
   }, [])
 
+  // Filter days to those containing a room matching the search query.
+  const days = useMemo(() => {
+    if (!data) return []
+    const q = search.trim().toLowerCase()
+    if (!q) return data.days
+    return data.days.filter(day =>
+      day.rooms.some(r =>
+        r.room_code.toLowerCase().includes(q) ||
+        (r.description || '').toLowerCase().includes(q)
+      )
+    )
+  }, [data, search])
+
+  // Toggle a room's block status for a day. Uses the live marks map so we
+  // always have the current mark id for cancellation.
+  async function toggleRoom(roomCode, dayNum) {
+    const key = `${roomCode}|${dayNum}`
+    setBusyChip(key)
+    try {
+      const existing = marksByRoomDay[roomCode]?.[dayNum]
+      if (existing && existing.status === 'pending') {
+        await onCancel(existing.id)         // unblock
+      } else if (!existing) {
+        await onMarkDay(roomCode, dayNum)   // block
+      }
+      // applied marks can't be toggled — ignored
+      // Re-pull the schedule so chip mark_status reflects reality
+      const fresh = await api.hospitalSchedule()
+      setData(fresh)
+    } catch (e) {
+      setError(e.message)
+    } finally {
+      setBusyChip(null)
+    }
+  }
+
   if (error) {
     return (
-      <div className="border-2 border-warn bg-warn/10 p-3 font-mono text-sm text-warn">
-        {error}
+      <div className="border-2 border-warn bg-warn/10 p-3 font-mono text-sm text-warn flex items-baseline gap-2">
+        <span className="flex-1">{error}</span>
+        <button onClick={() => setError(null)} className="underline">dismiss</button>
       </div>
     )
   }
@@ -274,26 +195,43 @@ function ScheduleTab({ projectStartDate }) {
 
   return (
     <div className="space-y-2">
+      <input
+        value={search}
+        onChange={e => setSearch(e.target.value)}
+        placeholder="search a room — e.g. RM-44 — to jump to its days…"
+        className="w-full border-2 border-ink bg-paper px-3 py-2 font-mono text-sm outline-none focus:bg-flag/10"
+      />
       <div className="font-mono text-[10px] uppercase tracking-wider text-ink/60 px-1">
-        {data.days.length} install days
+        {search.trim()
+          ? `${days.length} day${days.length === 1 ? '' : 's'} with matching rooms`
+          : `${data.days.length} install days`}
         {!projectStartDate && ' · set project start date for calendar dates'}
+        {' · tap a room to block / unblock it'}
       </div>
-      {data.days.map(day => (
+      {days.length === 0 && (
+        <div className="text-center font-mono text-sm text-ink/50 py-6">
+          no rooms match "{search}"
+        </div>
+      )}
+      {days.map(day => (
         <DayRow
           key={day.day}
           day={day}
           projectStartDate={projectStartDate}
           expanded={openDay === day.day}
           onToggle={() => setOpenDay(openDay === day.day ? null : day.day)}
+          searchHighlight={search.trim().toLowerCase()}
+          onToggleRoom={toggleRoom}
+          busyChip={busyChip}
         />
       ))}
     </div>
   )
 }
 
-function DayRow({ day, projectStartDate, expanded, onToggle }) {
+function DayRow({ day, projectStartDate, expanded, onToggle,
+                 searchHighlight, onToggleRoom, busyChip }) {
   const dateStr = dayDateOnly(projectStartDate, day.day)
-  // Count how many rooms on this day are already flagged unavailable
   const flagged = day.rooms.filter(r => r.mark_status).length
 
   return (
@@ -320,26 +258,41 @@ function DayRow({ day, projectStartDate, expanded, onToggle }) {
       {expanded && (
         <div className="border-t-2 border-ink p-3">
           <div className="font-mono text-[10px] uppercase tracking-wider text-ink/60 mb-2">
-            rooms worked on this day
+            tap a room to block it for this day
           </div>
           <div className="flex flex-wrap gap-1.5">
-            {day.rooms.map(room => (
-              <span
-                key={room.room_code}
-                className={
-                  'font-mono text-xs px-2 py-1 border-2 rounded-sm ' +
-                  (room.mark_status === 'pending'
-                    ? 'border-flag bg-flag/20 text-ink'
-                    : room.mark_status === 'applied'
-                      ? 'border-warn bg-warn/10 text-warn line-through'
-                      : 'border-ink/30 bg-paper text-ink')
-                }
-                title={room.description || room.room_code}
-              >
-                {room.room_code}
-                {room.mark_status === 'pending' && ' ⚑'}
-              </span>
-            ))}
+            {day.rooms.map(room => {
+              const isBusy = busyChip === `${room.room_code}|${day.day}`
+              const isMatch = searchHighlight &&
+                room.room_code.toLowerCase().includes(searchHighlight)
+              const applied = room.mark_status === 'applied'
+              const pending = room.mark_status === 'pending'
+              return (
+                <button
+                  key={room.room_code}
+                  onClick={() => !applied && onToggleRoom(room.room_code, day.day)}
+                  disabled={applied || isBusy}
+                  title={
+                    applied
+                      ? 'already rescheduled — locked'
+                      : (room.description || room.room_code)
+                  }
+                  className={
+                    'font-mono text-xs px-2 py-1 border-2 rounded-sm transition-colors ' +
+                    (isBusy ? 'opacity-40 ' : '') +
+                    (pending
+                      ? 'border-flag bg-flag/30 text-ink'
+                      : applied
+                        ? 'border-warn bg-warn/10 text-warn line-through cursor-not-allowed'
+                        : 'border-ink/40 bg-paper text-ink hover:border-ink hover:bg-ink/5') +
+                    (isMatch ? ' ring-2 ring-ink' : '')
+                  }
+                >
+                  {room.room_code}
+                  {pending && ' ⚑'}
+                </button>
+              )
+            })}
           </div>
         </div>
       )}
