@@ -35,13 +35,22 @@ export const api = {
   config:      () => get('/api/config'),
   workItem:    (id) => get(`/api/work-items/${id}`),
   floorplan:   () => get('/api/floorplan'),
-  // Unavailability
+
+  // --- Unavailability ---
+  // Canonical names:
   roomsForDay: (n) => get(`/api/unavailability/rooms-for-day/${n}`),
   listMarks:   (q = '') => get(`/api/unavailability${q ? '?' + q : ''}`),
   createMark:  (body) => post('/api/unavailability', body),
   cancelMark:  (id) => del(`/api/unavailability/${id}`),
-  // Same-day swap
-  suggestSwap: (locked, day, n=5) =>
+
+  // Back-compat aliases (some components were written against older names):
+  marks:       (status) =>
+    get('/api/unavailability' + (status ? `?status=${status}` : '')),
+  markRoom:    (room_code, day, marked_by, reason) =>
+    post('/api/unavailability', { room_code, day, marked_by, reason }),
+
+  // --- Same-day swap ---
+  suggestSwap: (locked, day, n = 5) =>
     get(`/api/swap/suggest?locked=${encodeURIComponent(locked)}&day=${day}&top_n=${n}`),
   executeSwap: (body) => post('/api/swap/execute', body),
   swapHistory: (day) => get(`/api/swap/history${day != null ? '?day=' + day : ''}`),
