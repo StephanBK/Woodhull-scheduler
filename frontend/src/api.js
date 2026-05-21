@@ -69,4 +69,7 @@ export const api = {
   markRoomDone: (body) => post('/api/completion/mark', body),
   endDay: (day) => post('/api/completion/end-day', { day }),
   progress: () => get('/api/completion/progress'),
+
+  // --- Hospital floor map ---
+  hospitalFloorplan: () => get('/api/floorplan/hospital'),
 }

@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { api } from '../api'
 import { dayLabel, dayDateOnly } from '../dates'
+import HospitalMap from './HospitalMap'
 
 /**
  * Hospital view: browse rooms with scheduled work, tap into a room,
@@ -259,9 +260,16 @@ function DayRow({ day, projectStartDate, expanded, onToggle,
       </button>
 
       {expanded && (
-        <div className="border-t-2 border-ink p-3">
-          <div className="font-mono text-[10px] uppercase tracking-wider text-ink/60 mb-2">
-            tap a room to block it for this day
+        <div className="border-t-2 border-ink p-3 space-y-3">
+          <HospitalMap
+            highlights={[{
+              rooms: day.rooms.map(r => r.room_code),
+              color: 'ink',
+              label: `Day ${day.day} rooms`,
+            }]}
+          />
+          <div className="font-mono text-[10px] uppercase tracking-wider text-ink/60">
+            tap a room to flag it & pick a replacement
           </div>
           <div className="flex flex-wrap gap-1.5">
             {day.rooms.map(room => {
@@ -317,6 +325,7 @@ function ReplacementPicker({ roomCode, dayNum, onClose, onDone }) {
   const [error, setError] = useState(null)
   const [busy, setBusy] = useState(false)
   const [result, setResult] = useState(null)
+  const [selected, setSelected] = useState(null)  // option highlighted on the map
 
   useEffect(() => {
     api.suggestReplacements(roomCode, dayNum)
@@ -412,10 +421,20 @@ function ReplacementPicker({ roomCode, dayNum, onClose, onDone }) {
 
           {!result && data && data.locked && (
             <div className="space-y-2">
+              <HospitalMap
+                highlights={[
+                  { rooms: [roomCode], color: 'flag', label: `flagged: ${roomCode}` },
+                  ...(selected
+                    ? [{ rooms: selected.rooms_text.match(/RM-\d+|COR-\d+/g) || [],
+                         color: 'ok',
+                         label: `replacement: ${selected.rooms_text.replace(/\s*\(.*?\)/g,'').trim()}` }]
+                    : []),
+                ]}
+              />
               <div className="font-mono text-[11px] text-ink/70 leading-relaxed">
                 {data.timing === 'imminent'
                   ? 'Panels are staged on the floor. Only exact-material swaps are offered — the installer moves rooms without fetching anything.'
-                  : 'Pick a replacement. Exact-material matches are listed first — those keep every day’s window count and the caps unchanged.'}
+                  : 'Tap a replacement to see it on the map. Tap again to confirm. Exact-material matches keep every day’s window count and the caps unchanged.'}
               </div>
 
               {data.options.length === 0 && (
@@ -427,34 +446,45 @@ function ReplacementPicker({ roomCode, dayNum, onClose, onDone }) {
                 </div>
               )}
 
-              {data.options.map(o => (
-                <button
-                  key={o.work_item_id}
-                  disabled={busy}
-                  onClick={() => pick(o)}
-                  className={
-                    'w-full border-2 p-2.5 text-left transition-colors disabled:opacity-50 ' +
-                    (o.exact_match
-                      ? 'border-ok bg-ok/5 hover:bg-ok/15'
-                      : 'border-ink/40 bg-paper hover:bg-ink/5')
-                  }
-                >
-                  <div className="flex items-baseline gap-2">
-                    <span className="font-mono text-sm font-semibold">
-                      {o.rooms_text.replace(/\s*\(.*?\)/g, '').trim()}
-                    </span>
-                    <span className={
-                      'font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 ' +
-                      (o.exact_match ? 'bg-ok text-paper' : 'bg-flag text-ink')
-                    }>
-                      {o.exact_match ? 'exact match' : `close (±${o.panel_mix_diff})`}
-                    </span>
-                    <span className="ml-auto font-mono text-[10px] text-ink/60">
-                      Day {o.scheduled_day} · {o.qty}w
-                    </span>
-                  </div>
-                </button>
-              ))}
+              {data.options.map(o => {
+                const isSel = selected?.work_item_id === o.work_item_id
+                return (
+                  <button
+                    key={o.work_item_id}
+                    disabled={busy}
+                    onClick={() => isSel ? pick(o) : setSelected(o)}
+                    className={
+                      'w-full border-2 p-2.5 text-left transition-colors disabled:opacity-50 ' +
+                      (isSel
+                        ? 'border-ink bg-ink text-paper'
+                        : o.exact_match
+                          ? 'border-ok bg-ok/5 hover:bg-ok/15'
+                          : 'border-ink/40 bg-paper hover:bg-ink/5')
+                    }
+                  >
+                    <div className="flex items-baseline gap-2">
+                      <span className="font-mono text-sm font-semibold">
+                        {o.rooms_text.replace(/\s*\(.*?\)/g, '').trim()}
+                      </span>
+                      <span className={
+                        'font-mono text-[9px] uppercase tracking-wider px-1.5 py-0.5 ' +
+                        (o.exact_match ? 'bg-ok text-paper' : 'bg-flag text-ink')
+                      }>
+                        {o.exact_match ? 'exact match' : `close (±${o.panel_mix_diff})`}
+                      </span>
+                      <span className={'ml-auto font-mono text-[10px] ' +
+                        (isSel ? 'text-paper/70' : 'text-ink/60')}>
+                        Day {o.scheduled_day} · {o.qty}w
+                      </span>
+                    </div>
+                    {isSel && (
+                      <div className="font-mono text-[10px] uppercase tracking-wider mt-1">
+                        tap again to confirm this swap →
+                      </div>
+                    )}
+                  </button>
+                )
+              })}
 
               <button onClick={onClose} disabled={busy}
                 className="w-full border-2 border-ink py-2 font-mono text-xs uppercase tracking-wider hover:bg-ink hover:text-paper transition-colors disabled:opacity-50">

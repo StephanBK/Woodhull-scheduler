@@ -55,3 +55,31 @@ def floorplan():
         "page": POSITIONS["page"],
         "bays": bays_out,
     }
+
+
+@router.get("/floorplan/hospital")
+def floorplan_hospital():
+    """
+    Hospital-facing floor map data: bay positions + a room->bay(s) lookup
+    so the hospital view can highlight the bay a flagged or replacement
+    room sits in. Rooms don't have their own coordinates — the bay is the
+    close approximation.
+    """
+    # room -> set of bays that contain it
+    room_to_bays: dict[str, list[str]] = {}
+    for r in fetch_all("""
+        SELECT DISTINCT wir.room_code, wi.bay
+        FROM work_item_rooms wir
+        JOIN work_items wi ON wi.id = wir.work_item_id
+    """):
+        room_to_bays.setdefault(r["room_code"], [])
+        if r["bay"] not in room_to_bays[r["room_code"]]:
+            room_to_bays[r["room_code"]].append(r["bay"])
+
+    return {
+        "image": "/floorplan.jpg",
+        "page": POSITIONS["page"],
+        "bays": [{"bay": b["bay"], "x": b["x"], "y": b["y"]}
+                 for b in POSITIONS["bays"]],
+        "room_to_bays": room_to_bays,
+    }
