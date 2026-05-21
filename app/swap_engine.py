@@ -16,6 +16,7 @@ Algorithm:
      each other, but we can use the bay-position data from the floor plan)
   5. Return ranked candidates with a "fit score"
 """
+import json
 import math
 from collections import defaultdict
 from app.db import fetch_all, fetch_one, engine
@@ -282,10 +283,11 @@ def execute_swap(locked_wi_id: str, swap_in_wi_id: str, day: int,
         """), {"d": day, "l": locked_wi_id, "s": swap_in_wi_id,
                "t": triggered_by, "n": notes})
 
-        # 6. Keep config.active_version_id in sync
+        # 6. Keep config.active_version_id in sync. json.dumps keeps every
+        #    config value valid JSON, the format get_config() expects (#7).
         c.execute(text("""
             UPDATE config SET value = :v WHERE key = 'active_version_id'
-        """), {"v": str(new_v)})
+        """), {"v": json.dumps(new_v)})
 
     return {
         "ok": True,

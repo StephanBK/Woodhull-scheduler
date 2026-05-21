@@ -26,22 +26,34 @@ from app.db import engine, fetch_all, fetch_one
 from sqlalchemy import text
 
 
-def get_batch_on_site_by_day():
+def get_batch_on_site_by_day(version_id: int | None = None):
     """
     Map batch_code -> the earliest day on which it's physically on-site.
 
     Right now we don't have explicit delivery dates (project_start_date is TBD).
-    Heuristic: each batch's earliest install-day in v1 is when it must be
-    on-site. The user will replace this with actual delivery dates from the
-    deliveries table when those are set.
+    Heuristic: each batch's earliest install-day is when it must be on-site.
+    The user will replace this with actual delivery dates from the deliveries
+    table when those are set.
+
+    `version_id` selects which schedule version to read. It defaults to the
+    currently-active version -- NOT a hardcoded one -- so that after swaps and
+    roll-forwards (which each create a newer version) the availability windows
+    stay in step with the live schedule.
     """
+    if version_id is None:
+        active = fetch_one(
+            "SELECT id FROM schedule_versions "
+            "WHERE is_active = TRUE ORDER BY id DESC LIMIT 1"
+        )
+        version_id = active["id"] if active else None
+
     rows = fetch_all("""
         SELECT batch_code, MIN(a.day) AS earliest_day
         FROM assignments a
         JOIN work_items wi ON wi.id = a.work_item_id
-        WHERE a.version_id = 1
+        WHERE a.version_id = :v
         GROUP BY batch_code
-    """)
+    """, v=version_id)
     return {r["batch_code"]: r["earliest_day"] for r in rows}
 
 
@@ -127,7 +139,7 @@ def plan(version_id: int | None = None) -> dict:
     for m in pending_marks:
         unavailable[m["room_code"]].add(m["day"])
 
-    batch_avail = get_batch_on_site_by_day()
+    batch_avail = get_batch_on_site_by_day(version_id)
     daily_caps = get_daily_caps()
 
     # Compute current per-day window load (for capacity checks)
