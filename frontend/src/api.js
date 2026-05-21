@@ -63,4 +63,10 @@ export const api = {
   suggestReplacements: (room, day) =>
     get(`/api/replace/suggest?room=${encodeURIComponent(room)}&day=${day}`),
   executeReplacement: (body) => post('/api/replace/execute', body),
+
+  // --- Installer room completion ---
+  dayCompletion: (day) => get(`/api/completion/day/${day}`),
+  markRoomDone: (body) => post('/api/completion/mark', body),
+  endDay: (day) => post('/api/completion/end-day', { day }),
+  progress: () => get('/api/completion/progress'),
 }

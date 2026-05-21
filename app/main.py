@@ -13,7 +13,8 @@ from pathlib import Path
 from app.migrate import apply_all
 from app.seed import seed
 from app.routes import (schedule, work_items, rooms, config, health,
-                        floorplan, unavailability, optimizer, swap, replace)
+                        floorplan, unavailability, optimizer, swap, replace,
+                        completion)
 
 FRONTEND_DIR = Path(__file__).resolve().parent.parent / "frontend" / "dist"
 
@@ -53,6 +54,7 @@ app.include_router(unavailability.router, prefix="/api")
 app.include_router(optimizer.router, prefix="/api")
 app.include_router(swap.router, prefix="/api")
 app.include_router(replace.router, prefix="/api")
+app.include_router(completion.router, prefix="/api")
 
 # Static frontend (will exist after `npm run build` in /frontend).
 # In dev, /frontend/dist doesn't exist yet — skip silently.
