@@ -89,24 +89,39 @@ def seed():
                 VALUES (:c, :k, :d)
             """), {"c": code, "k": kind, "d": desc})
 
-        # Initial version (Original).
-        #
-        # seed() must NOT assume it is the first thing to create a schedule
-        # version. Migrations run before seed() on startup, and a migration may
-        # legitimately pre-create another version (e.g. 0005 adds V1). Because a
-        # partial unique index allows only ONE active version (migration 0004),
-        # blindly inserting this row as active would collide. So claim "active"
-        # only if nothing else already holds it.
-        existing_active = c.execute(text(
-            "SELECT COUNT(*) FROM schedule_versions WHERE is_active"
-        )).scalar()
-        c.execute(text("""
-            INSERT INTO schedule_versions(label, is_active)
-            VALUES ('Original', :active)
-        """), {"active": existing_active == 0})
-        v1 = c.execute(text(
+        # Two schedule versions are created on a fresh seed:
+        #   * 'Original' (V2): the cap-exact schedule straight from schedule.json
+        #     (bays split across days, ~23 working days). Kept for reference but
+        #     INACTIVE.
+        #   * 'V1 — Whole Bays (28 day)': the hospital-facing schedule. The SAME
+        #     work items, re-dated onto the woodhull_walk V1 route (whole bays,
+        #     no splitting, 28 days). This is the ACTIVE version.
+        # Only ONE may be active at a time (partial unique index, migration 0004).
+        c.execute(text(
+            "INSERT INTO schedule_versions(label, is_active) VALUES ('Original', :a)"
+        ), {"a": False})
+        v2_id = c.execute(text(
             "SELECT id FROM schedule_versions WHERE label = 'Original'"
         )).scalar()
+        c.execute(text(
+            "INSERT INTO schedule_versions(label, is_active) "
+            "VALUES ('V1 — Whole Bays (28 day)', :a)"
+        ), {"a": True})
+        v1_id = c.execute(text(
+            "SELECT id FROM schedule_versions WHERE label = 'V1 — Whole Bays (28 day)'"
+        )).scalar()
+
+        # V1 ("whole bays") day layout, copied from woodhull_walk Version 1:
+        # run-lengths of how many consecutive bays (ascending 01..83) install on
+        # each of the 28 days. Sums to 83 bays across 28 days.
+        V1_RUNS = [5, 1, 1, 1, 2, 2, 1, 1, 3, 2, 2, 2, 5, 4,
+                   2, 2, 5, 6, 2, 2, 4, 5, 2, 2, 6, 6, 6, 1]
+        bay_to_v1_day, _b = {}, 1
+        for _day, _n in enumerate(V1_RUNS, start=1):
+            for _ in range(_n):
+                bay_to_v1_day[f"{_b:02d}"] = _day
+                _b += 1
+        v1_seq_per_day: dict[int, int] = {}
 
         # Work items + assignments + panels + rooms
         seq_per_day = {}
@@ -124,7 +139,15 @@ def seed():
                 c.execute(text("""
                     INSERT INTO assignments(version_id, work_item_id, day, sequence)
                     VALUES (:v, :id, :day, :seq)
-                """), {"v": v1, "id": bay["id"], "day": d["day"], "seq": seq})
+                """), {"v": v2_id, "id": bay["id"], "day": d["day"], "seq": seq})
+                # Same work item, placed on its V1 (whole-bays) day too.
+                v1d = bay_to_v1_day[bay["bay"]]
+                v1_seq_per_day[v1d] = v1_seq_per_day.get(v1d, 0) + 1
+                c.execute(text("""
+                    INSERT INTO assignments(version_id, work_item_id, day, sequence)
+                    VALUES (:v, :id, :day, :seq)
+                """), {"v": v1_id, "id": bay["id"], "day": v1d,
+                       "seq": v1_seq_per_day[v1d]})
                 for ptype, qty in bay["panels"].items():
                     c.execute(text("""
                         INSERT INTO work_item_panels(work_item_id, panel_code, qty)
@@ -140,7 +163,7 @@ def seed():
         defaults = {
             "project_start_date": None,
             "max_panels_per_week": {"1": 65, "2": 65, "3": 65, "4": 65, "5": 65},
-            "active_version_id": v1,
+            "active_version_id": v1_id,
         }
         for k, v in defaults.items():
             c.execute(text("INSERT INTO config(key, value) VALUES (:k, :v)"),
