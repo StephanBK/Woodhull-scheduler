@@ -89,11 +89,21 @@ def seed():
                 VALUES (:c, :k, :d)
             """), {"c": code, "k": kind, "d": desc})
 
-        # Initial version (v1 = Original)
+        # Initial version (Original).
+        #
+        # seed() must NOT assume it is the first thing to create a schedule
+        # version. Migrations run before seed() on startup, and a migration may
+        # legitimately pre-create another version (e.g. 0005 adds V1). Because a
+        # partial unique index allows only ONE active version (migration 0004),
+        # blindly inserting this row as active would collide. So claim "active"
+        # only if nothing else already holds it.
+        existing_active = c.execute(text(
+            "SELECT COUNT(*) FROM schedule_versions WHERE is_active"
+        )).scalar()
         c.execute(text("""
             INSERT INTO schedule_versions(label, is_active)
-            VALUES ('Original', TRUE)
-        """))
+            VALUES ('Original', :active)
+        """), {"active": existing_active == 0})
         v1 = c.execute(text(
             "SELECT id FROM schedule_versions WHERE label = 'Original'"
         )).scalar()
