@@ -13,9 +13,15 @@ from contextlib import contextmanager
 
 def get_database_url() -> str:
     url = os.environ.get("DATABASE_URL", "sqlite:///./woodhull.db")
-    # Railway sometimes provides postgres:// — SQLAlchemy needs postgresql://
+    # Railway provides postgres:// (or postgresql://). SQLAlchemy's bare
+    # postgresql:// dialect defaults to the psycopg2 driver, but this app ships
+    # psycopg v3 (see requirements.txt). Target the psycopg-v3 dialect
+    # explicitly, otherwise SQLAlchemy tries to import psycopg2 and crashes on
+    # startup. SQLite (local default) is left untouched.
     if url.startswith("postgres://"):
-        url = url.replace("postgres://", "postgresql://", 1)
+        url = "postgresql+psycopg://" + url[len("postgres://"):]
+    elif url.startswith("postgresql://"):
+        url = "postgresql+psycopg://" + url[len("postgresql://"):]
     return url
 
 
